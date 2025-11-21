@@ -166,13 +166,12 @@ class TestCaseParser:
             print("Error: No test case loaded")
             return False
         tc = self.test_case
-        tc_parts = tc.get("id").split("TC")
-        assert len(tc_parts) == 2, f"Invalid test case ID: {tc.get('id')}"
-        parts_ = tc_parts[0]
-        requirement_id = parts_.split("_")[0]
-        item_no = parts_.split("I")[1].split("_")[0]
+        testcase_id = tc.get("testcase_id", "unknown")
+        requirement_id = tc.get("requirement_id", "N/A")
         L = [
-            f"# **Requirement ID**: {requirement_id}, Item {item_no}, Test Case {tc_parts[1]}",
+            f"# Test Case: {testcase_id}",
+            "",
+            f"**Requirement ID:** {requirement_id}",
             "",
         ]
         meta = tc.get("metadata", {})
