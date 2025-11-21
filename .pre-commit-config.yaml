@@ -35,7 +35,6 @@ repos:
     rev: 6.1.0
     hooks:
       - id: flake8
-        args: ["--max-line-length=180", '--extend-ignore=E203,W503', '--exclude=venv,build,__pycache__,.venv,.git']
 
   - repo: local
     hooks:
