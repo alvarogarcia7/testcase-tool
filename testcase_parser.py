@@ -154,11 +154,7 @@ class TestCaseParser:
                 script_lines.extend(
                     [
                         'echo ""',
-                        'echo "${YELLOW}Step '
-                        + str(step_num)
-                        + ": "
-                        + step_desc
-                        + '${NC}"',
+                        'echo "${YELLOW}Step ' + str(step_num) + ": " + step_desc + '${NC}"',
                         'echo "-"*80',
                         "",
                     ]
@@ -487,9 +483,7 @@ class TestCaseParser:
 
                             if status_code is not None:
                                 status_emoji = "✅" if status_code == 0 else "❌"
-                                md_lines.append(
-                                    f"**Status Code:** {status_code} {status_emoji}"
-                                )
+                                md_lines.append(f"**Status Code:** {status_code} {status_emoji}")
 
                             if duration:
                                 md_lines.append(f"**Duration:** {duration}ms")
@@ -591,9 +585,7 @@ class TestCaseParser:
                 md_lines.append("")
 
             issues = verification.get("issues", [])
-            if issues and any(
-                issue.get("issue_id") or issue.get("description") for issue in issues
-            ):
+            if issues and any(issue.get("issue_id") or issue.get("description") for issue in issues):
                 md_lines.extend(
                     [
                         "**Issues:**",
