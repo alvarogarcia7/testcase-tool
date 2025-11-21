@@ -23,7 +23,7 @@ commands:
     commands:
       - docker ps -a
       - echo "Hello World"
-    
+
   - step: 2
     description: "POST request with JSON - use literal block"
     commands:
@@ -38,13 +38,13 @@ commands:
           }'
     expected_status: 0
     expected_output: ""
-  
+
   - step: 3
     description: "Commands with pipes and redirects"
     commands:
       - cat /var/log/app.log | grep ERROR | tail -n 10
       - ps aux | grep python | awk '{print $2}'
-  
+
   - step: 4
     description: "Bash script with conditions"
     commands:

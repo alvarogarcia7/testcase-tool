@@ -4,15 +4,11 @@ Unit tests for TestCaseParser using Python's built-in unittest module.
 No external dependencies required.
 """
 
-import unittest
 import os
-import sys
-import tempfile
 import shutil
-from pathlib import Path
+import tempfile
+import unittest
 
-# Add parent directory to path to import the module
-sys.path.insert(0, str(Path(__file__).parent.parent / 'files_3'))
 from testcase_parser import TestCaseParser
 
 
@@ -54,7 +50,7 @@ requirement_id: REQ001
 description: Test description
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -70,15 +66,15 @@ requirement_id: REQ001
 description: Test description
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
 
-        self.assertEqual(parser.test_case['testcase_id'], 'TC001')
-        self.assertEqual(parser.test_case['requirement_id'], 'REQ001')
-        self.assertEqual(parser.test_case['description'], 'Test description')
+        self.assertEqual(parser.test_case["testcase_id"], "TC001")
+        self.assertEqual(parser.test_case["requirement_id"], "REQ001")
+        self.assertEqual(parser.test_case["description"], "Test description")
 
     def test_load_nonexistent_file_returns_false(self):
         """Loading a non-existent file should return False"""
@@ -90,7 +86,7 @@ description: Test description
     def test_load_invalid_yaml_returns_false(self):
         """Loading an invalid YAML file should return False"""
         yaml_file = os.path.join(self.temp_dir, "invalid.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write("invalid: yaml: content: [")
 
         parser = TestCaseParser(yaml_file)
@@ -107,14 +103,14 @@ prerequisites:
   - Network access
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
 
-        self.assertEqual(len(parser.test_case['prerequisites']), 2)
-        self.assertEqual(parser.test_case['prerequisites'][0], 'Python 3.8+ installed')
+        self.assertEqual(len(parser.test_case["prerequisites"]), 2)
+        self.assertEqual(parser.test_case["prerequisites"][0], "Python 3.8+ installed")
 
 
 class TestLoadActualLog(unittest.TestCase):
@@ -142,7 +138,7 @@ testcase_id: TC001
 description: Test without actual_result
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -159,7 +155,7 @@ actual_result:
   log_file: ""
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -176,7 +172,7 @@ actual_result:
   log_file: nonexistent.log
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -200,9 +196,9 @@ execution_log:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         log_file = os.path.join(self.temp_dir, "test.log")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
-        with open(log_file, 'w') as f:
+        with open(log_file, "w") as f:
             f.write(log_content)
 
         parser = TestCaseParser(yaml_file)
@@ -242,14 +238,14 @@ description: Test description
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.sh")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_shell_script(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertTrue(content.startswith("#!/bin/bash"))
@@ -263,14 +259,14 @@ requirement_id: REQ001
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.sh")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_shell_script(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("TC_UNIQUE_123", content)
@@ -283,7 +279,7 @@ testcase_id: TC001
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.sh")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -304,14 +300,14 @@ prerequisites:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.sh")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_shell_script(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("PREREQUISITES CHECK", content)
@@ -331,14 +327,14 @@ commands:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.sh")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_shell_script(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("TEST EXECUTION", content)
@@ -352,7 +348,7 @@ testcase_id: TC001
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.sh")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -390,14 +386,14 @@ requirement_id: REQ001
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("# Test Case: TC_MARKDOWN_001", content)
@@ -411,14 +407,14 @@ requirement_id: REQ_UNIQUE_456
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("REQ_UNIQUE_456", content)
@@ -432,14 +428,14 @@ description: This is a test description
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("## Description", content)
@@ -456,14 +452,14 @@ prerequisites:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("## Prerequisites", content)
@@ -483,14 +479,14 @@ commands:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("## Test Steps", content)
@@ -510,14 +506,14 @@ metadata:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("smoke", content)
@@ -536,14 +532,14 @@ expected_result:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("## Expected Result", content)
@@ -557,7 +553,7 @@ testcase_id: TC001
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -588,14 +584,14 @@ verification:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("## Verification Results", content)
@@ -612,14 +608,14 @@ verification:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("FAIL", content)
@@ -640,14 +636,14 @@ verification:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("| Check | Result |", content)
@@ -668,7 +664,7 @@ class TestEdgeCases(unittest.TestCase):
     def test_handles_empty_yaml_file(self):
         """Should handle empty YAML file gracefully"""
         yaml_file = os.path.join(self.temp_dir, "empty.yml")
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write("")
 
         parser = TestCaseParser(yaml_file)
@@ -690,14 +686,14 @@ description: |
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_markdown(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("multiline", content)
@@ -711,7 +707,7 @@ testcase_id: TC001
         output_sh = os.path.join(self.temp_dir, "output.sh")
         output_md = os.path.join(self.temp_dir, "output.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -737,14 +733,14 @@ commands:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         output_file = os.path.join(self.temp_dir, "output.sh")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         parser.generate_shell_script(output_file)
 
-        with open(output_file, 'r') as f:
+        with open(output_file, "r") as f:
             content = f.read()
 
         self.assertIn("for i in 1 2 3", content)
@@ -802,7 +798,7 @@ verification:
         output_sh = os.path.join(self.temp_dir, "integration.sh")
         output_md = os.path.join(self.temp_dir, "integration.md")
 
-        with open(yaml_file, 'w') as f:
+        with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
@@ -815,15 +811,15 @@ verification:
         self.assertTrue(parser.generate_markdown(output_md))
 
         # Verify shell script
-        with open(output_sh, 'r') as f:
+        with open(output_sh, "r") as f:
             sh_content = f.read()
 
         self.assertIn("INT_001", sh_content)
-        self.assertIn("echo \"Step 1\"", sh_content)
-        self.assertIn("echo \"Step 2\"", sh_content)
+        self.assertIn('echo "Step 1"', sh_content)
+        self.assertIn('echo "Step 2"', sh_content)
 
         # Verify markdown
-        with open(output_md, 'r') as f:
+        with open(output_md, "r") as f:
             md_content = f.read()
 
         self.assertIn("INT_001", md_content)
@@ -833,5 +829,5 @@ verification:
         self.assertIn("smoke", md_content)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)
