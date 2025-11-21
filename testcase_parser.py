@@ -1,12 +1,9 @@
 #!/usr/bin/env python3
-"""Test Case Parser - generates shell scripts and markdown from YAML test cases."""
-
 import os, sys
 from pathlib import Path
 import yaml
 
 def G(d, *keys, default=""):
-    """Safely get nested dict values."""
     for k in keys:
         d = d.get(k, default) if isinstance(d, dict) else default
     return d if d is not None else default
@@ -44,10 +41,9 @@ class TestCaseParser:
         tc = self.test_case
         tid, desc = tc.get("testcase_id", "unknown"), tc.get("description", "").strip()
         L = [
-            "#!/bin/bash", "# Auto-generated test script", f"# Test Case: {tid}",
-            f"# Requirement: {tc.get('requirement_id', 'N/A')}", "", "set -e  # Exit on error", "",
-            "# Colors for output", "RED='\\033[0;31m'", "GREEN='\\033[0;32m'",
-            "YELLOW='\\033[1;33m'", "NC='\\033[0m' # No Color", "", 'echo "="*80',
+            "#!/bin/bash", f"# Test Case: {tid}", f"# Requirement: {tc.get('requirement_id', 'N/A')}",
+            "", "set -e", "", "RED='\\033[0;31m'", "GREEN='\\033[0;32m'",
+            "YELLOW='\\033[1;33m'", "NC='\\033[0m'", "", 'echo "="*80',
             f'echo "Test Case: {tid}"', f'echo "Description: {desc.split(chr(10))[0] if desc else "N/A"}"',
             'echo "="*80', ""
         ]
@@ -172,7 +168,7 @@ class TestCaseParser:
                 for i, c in enumerate(e.get("commands", []), 1):
                     L += [f"**Command {i}:**", "```bash", c.get("command", ""), "```", ""]
                     sc = c.get("status_code")
-                    if sc is not None: L.append(f"**Status Code:** {sc} {'✅' if sc == 0 else '❌'}")
+                    if sc is not None: L.append(f"**Status Code:** {sc} [{'OK' if sc == 0 else 'FAIL'}]")
                     if c.get("duration_ms"): L.append(f"**Duration:** {c['duration_ms']}ms")
                     if c.get("output"): L += ["", "**Output:**", "```", c["output"].strip(), "```"]
                     if c.get("stderr"): L += ["", "**Error Output:**", "```", c["stderr"].strip(), "```"]
@@ -185,12 +181,11 @@ class TestCaseParser:
     def _add_verif(self, L, v):
         L += ["## Verification Results", ""]
         if v.get("status"):
-            em = {"PASS": "✅", "FAIL": "❌", "BLOCKED": "🚫", "SKIPPED": "⏭️"}.get(v["status"], "")
-            L += [f"**Overall Status:** {v['status']} {em}", ""]
+            L += [f"**Overall Status:** {v['status']}", ""]
         steps = v.get("verification_steps", [])
         if steps:
             L += ["**Verification Steps:**", "", "| Check | Result |", "|-------|--------|"]
-            L += [f"| {s.get('check', '')} | {s.get('result', '')} {'✅' if s.get('result') == 'PASS' else '❌'} |" for s in steps]
+            L += [f"| {s.get('check', '')} | {s.get('result', '')} |" for s in steps]
             L.append("")
         if v.get("comments", "").strip(): L += ["**Comments:**", "", v["comments"].strip(), ""]
         if any(v.get(k) for k in ["executed_by", "execution_date", "environment"]):
@@ -213,7 +208,6 @@ class TestCaseParser:
 def main():
     if len(sys.argv) < 2:
         print("Usage: python testcase_parser.py <testcase.yml> [output_dir]")
-        print("Example: python testcase_parser.py X20_1.yml")
         sys.exit(1)
     yf = sys.argv[1]
     out_dir = sys.argv[2] if len(sys.argv) > 2 else str(Path(yf).parent)
@@ -223,7 +217,7 @@ def main():
     p.load_actual_log()
     sh, md = Path(out_dir) / f"{base}.sh", Path(out_dir) / f"{base}.md"
     if p.generate_shell_script(str(sh)) and p.generate_markdown(str(md)):
-        print(f"\nGeneration completed successfully!\n  Shell script: {sh}\n  Markdown doc: {md}")
+        print(f"\nGeneration completed!\n  Shell script: {sh}\n  Markdown doc: {md}")
     else:
         print("\nGeneration completed with errors")
         sys.exit(1)
