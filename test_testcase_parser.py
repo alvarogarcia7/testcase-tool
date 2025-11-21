@@ -174,6 +174,9 @@ actual_result:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
+        actual_log = os.path.join(self.temp_dir, "test.actual.log")
+        with open(yaml_file, "w") as f:
+            f.write("LOG LOG LOG")
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()

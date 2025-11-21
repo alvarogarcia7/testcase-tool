@@ -3,40 +3,5 @@
 # Executed: 2025-01-15T14:23:45Z
 # Environment: staging
 
-execution_log:
-  - timestamp: "2025-01-15T14:23:45Z"
-    step: 1
-    description: "Send login request with valid credentials"
-    commands:
-      - command: |
-          curl -X POST http://localhost:8080/api/login \
-            -H "Content-Type: application/json" \
-            -d '{"username":"testuser","password":"Test@123"}'
-        output: |
-          {
-            "success": true,
-            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6InRlc3R1c2VyIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
-            "user_id": 123,
-            "username": "testuser",
-            "expires_in": 86400
-          }
-        status_code: 0
-        duration_ms: 156
-        stderr: ""
-
-summary:
-  total_steps: 1
-  total_commands: 1
-  successful_commands: 1
-  failed_commands: 0
-  total_duration_ms: 156
-  start_time: "2025-01-15T14:23:45.000Z"
-  end_time: "2025-01-15T14:23:45.156Z"
-  overall_status: "SUCCESS"
-
-environment_info:
-  hostname: "test-runner-01"
-  os: "Linux 5.15.0-91-generic"
-  python_version: "3.11.4"
-  shell: "/bin/bash"
-  working_directory: "/home/qa/tests"
+$ / -> ls
+/usr /bin  /etc  /home  /var  /tmp  /opt  /lib  /sbin  /root  /dev  /proc  /sys

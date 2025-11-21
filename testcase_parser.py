@@ -35,11 +35,11 @@ class TestCaseParser:
         if not log_file:
             return False
         log_path = Path(self.yaml_file).parent / log_file
-        if not log_path.exists():
-            return False
+        assert log_path.exists(), f"Log file '{log_path}' does not exist"
         try:
-            self.actual_log = yaml.safe_load(open(log_path))
-            return True
+            with open(log_path) as f:
+                self.actual_log = [line.strip() for line in f.readlines()]
+                return True
         except Exception as e:
             print(f"Warning: Could not load log file '{log_path}': {e}")
             return False
@@ -166,10 +166,13 @@ class TestCaseParser:
             print("Error: No test case loaded")
             return False
         tc = self.test_case
+        tc_parts = tc.get("id").split("TC")
+        assert len(tc_parts) == 2, f"Invalid test case ID: {tc.get('id')}"
+        parts_ = tc_parts[0]
+        requirement_id = parts_.split("_")[0]
+        item_no = parts_.split("I")[1].split("_")[0]
         L = [
-            f"# Test Case: {tc.get('testcase_id', 'Unknown')}",
-            "",
-            f"**Requirement ID:** {tc.get('requirement_id', 'N/A')}",
+            f"# **Requirement ID**: {requirement_id}, Item {item_no}, Test Case {tc_parts[1]}",
             "",
         ]
         meta = tc.get("metadata", {})
@@ -245,32 +248,12 @@ class TestCaseParser:
             t.close()
 
     def _add_log(self, L):
-        entries = self.actual_log.get("execution_log", [])
-        if entries:
-            L += ["### Execution Log", ""]
-            for e in entries:
-                L += [
-                    f"#### Step {e.get('step', 0)}: {e.get('description', '')}",
-                    "",
-                    f"*Timestamp: {e.get('timestamp', '')}*",
-                    "",
-                ]
-                for i, c in enumerate(e.get("commands", []), 1):
-                    L += [f"**Command {i}:**", "```bash", c.get("command", ""), "```", ""]
-                    sc = c.get("status_code")
-                    if sc is not None:
-                        L.append(f"**Status Code:** {sc} [{'OK' if sc == 0 else 'FAIL'}]")
-                    if c.get("duration_ms"):
-                        L.append(f"**Duration:** {c['duration_ms']}ms")
-                    if c.get("output"):
-                        L += ["", "**Output:**", "```", c["output"].strip(), "```"]
-                    if c.get("stderr"):
-                        L += ["", "**Error Output:**", "```", c["stderr"].strip(), "```"]
-                    L.append("")
-        env = self.actual_log.get("environment_info", {})
-        if env:
-            L += ["### Environment Details", ""]
-            L += [f"- **{k.replace('_', ' ').title()}:** {v}" for k, v in env.items()] + [""]
+        L.extend(["**Actual Execution Log:**", ""])
+        L.append("```")
+        for line in self.actual_log:
+            if line.strip() and not line.startswith("#"):
+                L.append(line)
+        L.extend(["```", ""])
 
     def _add_verif(self, L, v):
         L += ["## Verification Results", ""]
@@ -307,16 +290,16 @@ class TestCaseParser:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: python testcase_parser.py <testcase.yml> [output_dir]")
+        print("Usage: python testcase_parser.py <testcase.yml> <output_dir>")
         sys.exit(1)
     yf = sys.argv[1]
-    out_dir = sys.argv[2] if len(sys.argv) > 2 else str(Path(yf).parent)
-    base = Path(yf).stem
+    out_dir = Path(sys.argv[2]).absolute() if len(sys.argv) > 2 else "."
+    base = Path(yf).absolute()
     p = TestCaseParser(yf)
     if not p.load_test_case():
         sys.exit(1)
     p.load_actual_log()
-    sh, md = Path(out_dir) / f"{base}.sh", Path(out_dir) / f"{base}.md"
+    sh, md = Path(out_dir) / f"{base.stem}.sh", Path(out_dir) / f"{base.stem}.md"
     if p.generate_shell_script(str(sh)) and p.generate_markdown(str(md)):
         print(f"\nGeneration completed!\n  Shell script: {sh}\n  Markdown doc: {md}")
     else:

@@ -41,7 +41,7 @@ echo "Command: python3 testcase_parser.py X20_1_example.yml tmp/"
 echo ""
 
 mkdir -p tmp
-python3 testcase_parser.py X20_1_example.yml tmp/
+python3 testcase_parser.py ./data/dataset_3/X20_1_example.yml tmp/
 
 if [ $? -eq 0 ]; then
     echo ""
