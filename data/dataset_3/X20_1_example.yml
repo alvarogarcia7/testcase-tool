@@ -47,15 +47,14 @@ expected_result:
       command: "echo $RESPONSE | jq -r '.token'"
 
 actual_result:
-  log_file: "X20_1.actual.log"
-  execution_date: "2025-01-15T14:23:45Z"
-  executed_by: "qa-automation"
-  environment: "staging"
-  summary:
-    total_steps: 1
-    total_commands: 1
-    total_duration_ms: 156
-    overall_status: "SUCCESS"
+  execution_log:
+    - timestamp: "2025-01-15T14:23:45Z"
+      step: 1
+      command: "curl -X POST http://localhost:8080/api/login -H 'Content-Type: application/json' -d '{\"username\":\"testuser\",\"password\":\"Test@123\"}'"
+      output: |
+        {"success":true,"token":"eyJhbGc...xyz","user_id":123,"username":"testuser"}
+      status_code: 0
+      duration_ms: 156
 
 verification:
   status: "PASS"

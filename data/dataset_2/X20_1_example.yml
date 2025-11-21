@@ -1,8 +1,7 @@
 # Test Case: User Login Authentication
 # X20_1 - Basic login functionality test
 
-testcase_id: "X20_1"
-requirement_id: "X20"
+testcase_id: "X20_I1_TC1"
 
 metadata:
   tags:
@@ -23,7 +22,11 @@ prerequisites:
 commands:
   - step: 1
     description: "Send login request with valid credentials"
-    command: "curl -X POST http://localhost:8080/api/login -H 'Content-Type: application/json' -d '{\"username\":\"testuser\",\"password\":\"Test@123\"}'"
+    commands:
+      - |
+        curl -X POST http://localhost:8080/api/login \
+          -H "Content-Type: application/json" \
+          -d '{"username":"testuser","password":"Test@123"}'
     expected_status: 0
 
 expected_result:
@@ -42,15 +45,18 @@ expected_result:
     - description: "Verify response contains token"
       command: "echo $RESPONSE | jq -r '.token'"
 
-actual_result:
-  execution_log:
-    - timestamp: "2025-01-15T14:23:45Z"
-      step: 1
-      command: "curl -X POST http://localhost:8080/api/login -H 'Content-Type: application/json' -d '{\"username\":\"testuser\",\"password\":\"Test@123\"}'"
-      output: |
-        {"success":true,"token":"eyJhbGc...xyz","user_id":123,"username":"testuser"}
-      status_code: 0
-      duration_ms: 156
+results:
+  expected:
+    description: |
+      All commands should execute successfully without syntax errors.
+
+  actual:
+  log_file: "X20_1.actual.log"
+  execution_date: "2025-01-15T14:23:45Z"
+  executed_by: "qa-automation"
+  environment: "staging"
+  summary:
+    overall_status: "PASS"
 
 verification:
   status: "PASS"

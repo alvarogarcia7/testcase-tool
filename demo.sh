@@ -1,6 +1,24 @@
 #!/bin/bash
 # Demo script showing the complete test case workflow
 
+check_virtualenv() {
+    if [ -z "$VIRTUAL_ENV" ]; then
+        if [ -f ".venv/bin/activate" ]; then
+            echo "Activating: source .venv/bin/activate"
+            source .venv/bin/activate
+        else
+          echo "Error: Virtual environment is not activated"
+            echo "No virtual environment found. Please create one first."
+        fi
+    fi
+    echo "Virtual environment is activated: $VIRTUAL_ENV"
+}
+
+# Check if virtual environment is activated
+check_virtualenv
+
+
+# Print header
 echo "=========================================="
 echo "Test Case Parser Demo"
 echo "=========================================="
@@ -19,10 +37,11 @@ if [ ! -f "X20_1_example.yml" ]; then
 fi
 
 echo "Step 1: Parsing test case YAML..."
-echo "Command: python3 testcase_parser.py X20_1_example.yml"
+echo "Command: python3 testcase_parser.py X20_1_example.yml tmp/"
 echo ""
 
-python3 testcase_parser.py X20_1_example.yml
+mkdir -p tmp
+python3 testcase_parser.py X20_1_example.yml tmp/
 
 if [ $? -eq 0 ]; then
     echo ""
