@@ -1,8 +1,7 @@
 # Test Case: User Login Authentication
 # X20_1 - Basic login functionality test
 
-testcase_id: "X20_1"
-requirement_id: "X20"
+testcase_id: "X20_I1_TC1"
 
 metadata:
   tags:
@@ -33,7 +32,7 @@ commands:
 expected_result:
   description: |
     API should return HTTP 200 with authentication token and user details.
-  
+
   expected_outputs:
     - field: "http_status"
       value: 200
@@ -41,25 +40,27 @@ expected_result:
       value: true
     - field: "response.token"
       condition: "exists and not empty"
-  
+
   verification_commands:
     - description: "Verify response contains token"
       command: "echo $RESPONSE | jq -r '.token'"
 
-actual_result:
+results:
+  expected:
+    description: |
+      All commands should execute successfully without syntax errors.
+
+  actual:
   log_file: "X20_1.actual.log"
   execution_date: "2025-01-15T14:23:45Z"
   executed_by: "qa-automation"
   environment: "staging"
   summary:
-    total_steps: 1
-    total_commands: 1
-    total_duration_ms: 156
-    overall_status: "SUCCESS"
+    overall_status: "PASS"
 
 verification:
   status: "PASS"
-  
+
   verification_steps:
     - check: "HTTP status is 200"
       result: "PASS"
@@ -67,14 +68,14 @@ verification:
       result: "PASS"
     - check: "Token is present and non-empty"
       result: "PASS"
-  
+
   comments: |
     Test passed successfully. User authenticated and received valid token.
-  
+
   executed_by: "qa-automation"
   execution_date: "2025-01-15T14:23:45Z"
   environment: "staging"
-  
+
   issues: []
-  
+
   notes: ""

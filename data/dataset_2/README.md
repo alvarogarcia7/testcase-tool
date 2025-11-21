@@ -89,13 +89,13 @@ What should happen when test executes correctly:
 expected_result:
   description: |                      # Narrative description
     What should happen...
-  
+
   expected_outputs:                   # Specific values to check
     - field: "status_code"
       value: 200
     - field: "response.token"
       condition: "is not null"
-  
+
   verification_commands:              # Commands to verify results
     - description: "Check token"
       command: "jwt decode $TOKEN"
@@ -134,7 +134,7 @@ execution_log:
         status_code: 0
         duration_ms: 3200
         stderr: ""
-      
+
       - command: second command
         output: "output text"
         status_code: 0
@@ -174,23 +174,23 @@ Final test results and analysis:
 ```yaml
 verification:
   status: "PASS"                      # PASS, FAIL, BLOCKED, SKIPPED
-  
+
   verification_steps:                 # Individual checks performed
     - check: "Description of check"
       result: "PASS"                  # PASS or FAIL
-  
+
   comments: |                         # Overall assessment
     Analysis and observations
-  
+
   executed_by: "user@example.com"     # Who ran the test
   execution_date: "2025-01-15T10:30:00Z"
   environment: "staging"              # Where it was run
-  
+
   issues:                             # Problems found
     - issue_id: "BUG-123"
       description: "Brief description"
       severity: "HIGH"                # CRITICAL, HIGH, MEDIUM, LOW
-  
+
   notes: |                            # Additional notes
     Any other relevant information
 ```
@@ -247,7 +247,7 @@ See the following example files:
 3. **Version Control**: Store YAML files in Git for change tracking
 4. **Consistency**: Use consistent formatting and terminology across test cases
 5. **Completeness**: Fill in all sections, even if some are marked as empty/N/A
-6. **File Organization**: 
+6. **File Organization**:
    - Keep test case YAML and its log file together
    - Suggested directory structure:
      ```
@@ -260,7 +260,7 @@ See the following example files:
        AUTH_01.actual.log
      ```
    - Consider organizing by requirement or feature area for large test suites
-7. **Log File Management**: 
+7. **Log File Management**:
    - Archive old log files when re-running tests
    - Consider timestamped log files for multiple runs: `X20_1.actual.2025-01-15.log`
 

@@ -1,8 +1,7 @@
 # Test Case: API Response Validation
 # API_03 - Test complex curl commands without escaping
 
-testcase_id: "API_03"
-requirement_id: "API"
+testcase_id: "X20_I1_TC1"
 
 metadata:
   tags:
@@ -24,7 +23,7 @@ commands:
     commands:
       - docker ps -a
       - echo "Hello World"
-    
+
   - step: 2
     description: "POST request with JSON - use literal block"
     commands:
@@ -37,13 +36,15 @@ commands:
             "email": "john@example.com",
             "roles": ["admin", "user"]
           }'
-  
+    expected_status: 0
+    expected_output: ""
+
   - step: 3
     description: "Commands with pipes and redirects"
     commands:
       - cat /var/log/app.log | grep ERROR | tail -n 10
       - ps aux | grep python | awk '{print $2}'
-  
+
   - step: 4
     description: "Bash script with conditions"
     commands:
@@ -55,30 +56,36 @@ commands:
         fi
       - test -d /var/data && echo "Directory exists" || echo "Not found"
 
-expected_result:
-  description: |
-    All commands should execute successfully without syntax errors.
-  
-  verification_commands:
-    - echo $?
+verification_commands:
+  - description: "Verify response contains token"
+    commands:
+      - |
+        ssh << 'EOF'
+        echo $RESPONSE | jq -r '.token'
+        hello
+        exit
+        EOF
 
-actual_result:
-  log_file: "API_03.actual.log"
-  execution_date: ""
-  executed_by: ""
-  environment: ""
-  summary:
-    total_steps: 0
-    total_commands: 0
-    total_duration_ms: 0
-    overall_status: ""
+results:
+  expected:
+    description: |
+      All commands should execute successfully without syntax errors.
+
+  actual:
+    log_file: "X20_1.actual.log"
+    execution_date: "2025-01-15T14:23:45Z"
+    executed_by: "qa-automation"
+    environment: "staging"
+    summary:
+      overall_status: "PASS"
 
 verification:
-  status: ""
-  verification_steps: []
-  comments: ""
-  executed_by: ""
-  execution_date: ""
-  environment: ""
+  status: "PASS"
+  comments: |
+    Test passed successfully. User authenticated and received valid token.
+
+  executed_by: "qa-verication"
+  execution_date: "2025-01-15T14:23:45Z"
+  environment: "staging"
   issues: []
   notes: ""

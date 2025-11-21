@@ -21,11 +21,11 @@ This format works well for both manual and automated test execution.
 
 ## Structure Highlights
 
-✅ One test case per file (named like `X20_1.yml`)  
-✅ Multiple commands with optional descriptions and status codes  
-✅ Tags and categories for organization  
-✅ Comprehensive expected results (description + specific outputs + verification commands)  
-✅ Detailed verification section with pass/fail status, steps, comments, and issue tracking  
-✅ Human-readable and automation-friendly  
+✅ One test case per file (named like `X20_1.yml`)
+✅ Multiple commands with optional descriptions and status codes
+✅ Tags and categories for organization
+✅ Comprehensive expected results (description + specific outputs + verification commands)
+✅ Detailed verification section with pass/fail status, steps, comments, and issue tracking
+✅ Human-readable and automation-friendly
 
 The structure is flexible - you can omit optional fields like `notes`, `expected_status`, or leave `issues` empty when not needed. Feel free to adjust based on your specific needs!
