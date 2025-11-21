@@ -70,7 +70,3 @@ verification:
   executed_by: "qa-automation"
   execution_date: "2025-01-15T14:23:45Z"
   environment: "staging"
-
-  issues: []
-
-  notes: ""

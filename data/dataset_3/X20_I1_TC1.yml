@@ -1,7 +1,7 @@
 # Test Case: API Response Validation
 # API_03 - Test complex curl commands without escaping
 
-testcase_id: "X20_I1_TC1"
+id: "X20_I1_TC1"
 
 metadata:
   tags:
