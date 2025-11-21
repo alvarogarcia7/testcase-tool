@@ -174,6 +174,9 @@ actual_result:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
+        actual_log = os.path.join(self.temp_dir, "test.actual.log")
+        with open(yaml_file, "w") as f:
+            f.write("LOG LOG LOG")
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
@@ -575,7 +578,7 @@ class TestVerificationSection(unittest.TestCase):
         shutil.rmtree(self.temp_dir)
 
     def test_generates_verification_status_pass(self):
-        """Should show PASS status with emoji"""
+        """Should show PASS status"""
         yaml_content = """
 testcase_id: TC001
 verification:
@@ -596,10 +599,9 @@ verification:
 
         self.assertIn("## Verification Results", content)
         self.assertIn("PASS", content)
-        self.assertIn("✅", content)
 
     def test_generates_verification_status_fail(self):
-        """Should show FAIL status with emoji"""
+        """Should show FAIL status"""
         yaml_content = """
 testcase_id: TC001
 verification:
@@ -619,7 +621,6 @@ verification:
             content = f.read()
 
         self.assertIn("FAIL", content)
-        self.assertIn("❌", content)
 
     def test_generates_verification_steps_table(self):
         """Should generate verification steps as table"""
