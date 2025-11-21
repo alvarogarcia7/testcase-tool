@@ -1,0 +1,117 @@
+# Test Case Template
+# Format: <RequirementID>_<TestCaseID> (e.g., X20_1)
+
+testcase_id: "X20_1"
+requirement_id: "X20"
+
+metadata:
+  tags:
+    - "integration"
+    - "api"
+    - "smoke"
+  categories:
+    - "authentication"
+    - "backend"
+
+description: |
+  Detailed description of what this test case validates.
+  Can be multi-line and include the purpose, scope, and any
+  important context about the test.
+
+prerequisites:
+  - "Database is running and accessible"
+  - "Test user account exists with credentials (user: testuser, pass: test123)"
+  - "API server is running on port 8080"
+  - "Required test data is seeded in the database"
+
+commands:
+  - step: 1
+    description: "Initialize test environment"
+    command: "docker-compose up -d"
+    expected_status: 0
+    notes: "Optional notes about this step"
+  
+  - step: 2
+    description: "Run authentication test"
+    command: 
+      - curl -X POST http://localhost:8080/api/login -d '{"user":"testuser","password":"test123"}'
+    expected_status: 0
+  
+  - step: 3
+    command: "python scripts/verify_token.py --token $AUTH_TOKEN"
+    expected_status: 0
+
+expected_result:
+  description: |
+    User should be successfully authenticated and receive a valid JWT token.
+    The token should be valid for 24 hours and contain the correct user claims.
+  
+  expected_outputs:
+    - field: "status_code"
+      value: 200
+    - field: "response.token"
+      condition: "is not null"
+    - field: "response.expires_in"
+      value: 86400
+  
+  verification_commands:
+    - description: "Verify token is valid"
+      command: "jwt decode $AUTH_TOKEN"
+    - description: "Check token expiration"
+      command: "python scripts/check_token_expiry.py --token $AUTH_TOKEN"
+
+actual_result:
+  execution_log:
+    - timestamp: "2025-01-15T10:30:00Z"
+      step: 1
+      command: "docker-compose up -d"
+      output: |
+        Creating network "test_default" with the default driver
+        Creating test_db_1 ... done
+        Creating test_api_1 ... done
+      status_code: 0
+      duration_ms: 3420
+    
+    - timestamp: "2025-01-15T10:30:05Z"
+      step: 2
+      command: "curl -X POST http://localhost:8080/api/login -d '{\"user\":\"testuser\",\"password\":\"test123\"}'"
+      output: |
+        {"status":"success","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","expires_in":86400}
+      status_code: 0
+      duration_ms: 145
+    
+    - timestamp: "2025-01-15T10:30:06Z"
+      step: 3
+      command: "python scripts/verify_token.py --token $AUTH_TOKEN"
+      output: "Token validation: PASSED"
+      status_code: 0
+      duration_ms: 89
+
+verification:
+  status: "PASS"  # PASS, FAIL, BLOCKED, SKIPPED
+  
+  verification_steps:
+    - check: "Status code is 200"
+      result: "PASS"
+    - check: "Token is present in response"
+      result: "PASS"
+    - check: "Token expiry is 24 hours"
+      result: "PASS"
+    - check: "Token contains correct user claims"
+      result: "PASS"
+  
+  comments: |
+    Test executed successfully. All verification steps passed.
+    Token was validated and contains expected claims.
+  
+  executed_by: "john.doe@example.com"
+  execution_date: "2025-01-15T10:30:00Z"
+  environment: "staging"
+  
+  issues:
+    - issue_id: ""
+      description: ""
+      severity: ""  # CRITICAL, HIGH, MEDIUM, LOW
+  
+  notes: |
+    Any additional observations or notes about the test execution.

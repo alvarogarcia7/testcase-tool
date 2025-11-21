@@ -1,0 +1,90 @@
+# Execution Log Template
+# Test Case: <TestCaseID>
+# Requirement: <RequirementID>
+# Executed: <Timestamp>
+# Environment: <Environment>
+
+execution_log:
+  - timestamp: "2025-01-15T10:30:00Z"
+    step: 1
+    description: "Initialize test environment"
+    commands:
+      - command: docker-compose up -d
+        output: |
+          Creating network "test_default" with the default driver
+          Creating test_db_1 ... done
+          Creating test_api_1 ... done
+        status_code: 0
+        duration_ms: 3200
+        stderr: ""
+      
+      - command: sleep 5
+        output: ""
+        status_code: 0
+        duration_ms: 5010
+        stderr: ""
+  
+  - timestamp: "2025-01-15T10:30:08Z"
+    step: 2
+    description: "Run authentication test"
+    commands:
+      - command: |
+          curl -X POST http://localhost:8080/api/login \
+            -H "Content-Type: application/json" \
+            -d '{"user":"testuser","password":"test123"}'
+        output: |
+          {
+            "status": "success",
+            "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "expires_in": 86400
+          }
+        status_code: 0
+        duration_ms: 145
+        stderr: ""
+  
+  - timestamp: "2025-01-15T10:30:09Z"
+    step: 3
+    description: "Verify token"
+    commands:
+      - command: python scripts/verify_token.py --token $AUTH_TOKEN
+        output: |
+          Token validation: PASSED
+          Claims: {
+            "sub": "testuser",
+            "iat": 1705320609,
+            "exp": 1705407009
+          }
+        status_code: 0
+        duration_ms: 89
+        stderr: ""
+      
+      - command: echo "Token verification complete"
+        output: "Token verification complete"
+        status_code: 0
+        duration_ms: 2
+        stderr: ""
+
+summary:
+  total_steps: 3
+  total_commands: 5
+  successful_commands: 5
+  failed_commands: 0
+  total_duration_ms: 8446
+  start_time: "2025-01-15T10:30:00.000Z"
+  end_time: "2025-01-15T10:30:08.446Z"
+  overall_status: "SUCCESS"
+
+environment_info:
+  hostname: "test-runner-02"
+  os: "Linux 5.15.0-91-generic"
+  python_version: "3.11.4"
+  shell: "/bin/bash"
+  working_directory: "/home/qa/tests"
+  user: "qa-automation"
+
+# Optional: Additional metadata
+metadata:
+  test_run_id: "run-20250115-103000"
+  ci_build_number: "1234"
+  git_commit: "a1b2c3d4"
+  git_branch: "main"

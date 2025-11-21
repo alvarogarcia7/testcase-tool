@@ -1,0 +1,84 @@
+# Test Case: API Response Validation
+# API_03 - Test complex curl commands without escaping
+
+testcase_id: "API_03"
+requirement_id: "API"
+
+metadata:
+  tags:
+    - "api"
+    - "integration"
+  categories:
+    - "rest-api"
+
+description: |
+  Demonstrates how to write shell commands without escaping quotes,
+  brackets, or special characters.
+
+prerequisites:
+  - "API server is running"
+
+commands:
+  - step: 1
+    description: "Simple command - no escaping needed"
+    commands:
+      - docker ps -a
+      - echo "Hello World"
+    
+  - step: 2
+    description: "POST request with JSON - use literal block"
+    commands:
+      - |
+        curl -X POST http://localhost:8080/api/users \
+          -H "Content-Type: application/json" \
+          -H "Authorization: Bearer ${TOKEN}" \
+          -d '{
+            "name": "John Doe",
+            "email": "john@example.com",
+            "roles": ["admin", "user"]
+          }'
+  
+  - step: 3
+    description: "Commands with pipes and redirects"
+    commands:
+      - cat /var/log/app.log | grep ERROR | tail -n 10
+      - ps aux | grep python | awk '{print $2}'
+  
+  - step: 4
+    description: "Bash script with conditions"
+    commands:
+      - |
+        if [ -f /tmp/test.txt ]; then
+          echo "File exists"
+        else
+          echo "File not found"
+        fi
+      - test -d /var/data && echo "Directory exists" || echo "Not found"
+
+expected_result:
+  description: |
+    All commands should execute successfully without syntax errors.
+  
+  verification_commands:
+    - echo $?
+
+actual_result:
+  log_file: "API_03.actual.log"
+  execution_date: ""
+  executed_by: ""
+  environment: ""
+  summary:
+    total_steps: 0
+    total_commands: 0
+    total_duration_ms: 0
+    overall_status: ""
+
+verification:
+  status: ""
+  verification_steps: []
+  comments: ""
+  executed_by: ""
+  execution_date: ""
+  environment: ""
+  issues: []
+  notes: ""
