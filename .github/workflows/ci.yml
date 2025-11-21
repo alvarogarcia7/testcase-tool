@@ -26,16 +26,16 @@ jobs:
 
     - name: Run black (check formatting)
       run: |
-        black --check --diff .
+        uv run black --check --diff .
 
     - name: Run isort (check import sorting)
       run: |
-        isort --check-only --diff .
+        uv run isort --check-only --diff .
 
     - name: Run flake8 (linting)
       run: |
-        flake8 .
+        uv run flake8 .
 
     - name: Run tests
       run: |
-        python -m unittest discover -v
+        uv run python -m unittest discover -v
