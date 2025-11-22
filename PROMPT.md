@@ -29,3 +29,9 @@ This format works well for both manual and automated test execution.
 ✅ Human-readable and automation-friendly
 
 The structure is flexible - you can omit optional fields like `notes`, `expected_status`, or leave `issues` empty when not needed. Feel free to adjust based on your specific needs!
+
+## 2025-11-22 08:54:03 AGB
+
+create a branch called 'version/script-only' that contains only the feature of the generation of the shell. modify the tests accordingly.
+add support for variables, so that the command in the variables (syntax $PATH) can be read from the operating system.
+reduce or shrink the code, by removing superfluous and unnecessary stuff
