@@ -1,5 +1,5 @@
 #!/bin/bash
-# Demo script showing the complete test case workflow
+# Demo script for shell script generation from YAML test cases
 
 check_virtualenv() {
     if [ -z "$VIRTUAL_ENV" ]; then
@@ -7,20 +7,19 @@ check_virtualenv() {
             echo "Activating: source .venv/bin/activate"
             source .venv/bin/activate
         else
-          echo "Error: Virtual environment is not activated"
-            echo "No virtual environment found. Please create one first."
+            echo "Error: No virtual environment found"
+            echo "Please create one first: python -m venv .venv"
+            exit 1
         fi
     fi
-    echo "Virtual environment is activated: $VIRTUAL_ENV"
+    echo "Virtual environment: $VIRTUAL_ENV"
 }
 
-# Check if virtual environment is activated
+# Check virtual environment
 check_virtualenv
 
-
-# Print header
 echo "=========================================="
-echo "Test Case Parser Demo"
+echo "Test Case Parser Demo - Shell Script Only"
 echo "=========================================="
 echo ""
 
@@ -30,8 +29,8 @@ if [ ! -f "testcase_parser.py" ]; then
     exit 1
 fi
 
-echo "Step 1: Parsing test case YAML..."
-echo "Command: python3 testcase_parser.py X20_1_example.yml tmp/"
+echo "Parsing test case YAML and generating shell script..."
+echo "Command: python3 testcase_parser.py ./data/dataset_3/X20_I1_TC1.yml tmp/"
 echo ""
 
 mkdir -p tmp
@@ -39,13 +38,10 @@ python3 testcase_parser.py ./data/dataset_3/X20_I1_TC1.yml tmp/
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✅ Successfully generated:"
-    echo "   - X20_1_example.sh (executable test script)"
-    echo "   - X20_1_example.md (markdown documentation)"
+    echo "Successfully generated executable test script: tmp/X20_I1_TC1.sh"
     echo ""
+    echo "You can run it with: ./tmp/X20_I1_TC1.sh"
 else
-    echo "❌ Failed to generate outputs"
+    echo "Failed to generate script"
     exit 1
 fi
-
-echo "OK"
