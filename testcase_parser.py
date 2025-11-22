@@ -34,7 +34,7 @@ class TestCaseParser:
             return os.environ.get(var_name, match.group(0))
 
         # Match ${VAR} or $VAR (word characters only for $VAR)
-        return re.sub(r'\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)', replace_var, text)
+        return re.sub(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)", replace_var, text)
 
     def generate_shell_script(self, output_file):
         if not self.test_case:
@@ -58,28 +58,34 @@ class TestCaseParser:
             lines.append("")
 
         # Color codes
-        lines.extend([
-            "RED='\\033[0;31m'",
-            "GREEN='\\033[0;32m'",
-            "YELLOW='\\033[1;33m'",
-            "NC='\\033[0m'",
-            "",
-        ])
+        lines.extend(
+            [
+                "RED='\\033[0;31m'",
+                "GREEN='\\033[0;32m'",
+                "YELLOW='\\033[1;33m'",
+                "NC='\\033[0m'",
+                "",
+            ]
+        )
 
         # Header
-        lines.extend([
-            'echo "="*80',
-            f'echo "Test Case: {tc.get("testcase_id", tc.get("id", "unknown"))}"',
-            'echo "="*80',
-            "",
-        ])
+        lines.extend(
+            [
+                f'echo {"="*80}',
+                f'echo "Test Case: {tc.get("testcase_id", tc.get("id", "unknown"))}"',
+                f'echo {"="*80}',
+                "",
+            ]
+        )
 
         # Prerequisites
         prereqs = tc.get("prerequisites", [])
         if prereqs:
-            lines.extend([
-                'echo "${YELLOW}Prerequisites:${NC}"',
-            ])
+            lines.extend(
+                [
+                    'echo "${YELLOW}Prerequisites:${NC}"',
+                ]
+            )
             for p in prereqs:
                 lines.append(f'echo "  - {p}"')
             lines.append("")
@@ -91,10 +97,12 @@ class TestCaseParser:
             for step in cmds:
                 step_num = step.get("step", 0)
                 step_desc = step.get("description", f"Step {step_num}")
-                lines.extend([
-                    f'echo "Step {step_num}: {step_desc}"',
-                    "",
-                ])
+                lines.extend(
+                    [
+                        f'echo "Step {step_num}: {step_desc}"',
+                        "",
+                    ]
+                )
                 for cmd in step.get("commands", []):
                     cmd_text = cmd.strip() if isinstance(cmd, str) else str(cmd)
                     # Expand environment variables in command
@@ -116,12 +124,14 @@ class TestCaseParser:
                         lines.extend([cmd_text, ""])
 
         # Summary
-        lines.extend([
-            'echo ""',
-            'echo "="*80',
-            'echo "${GREEN}Test completed${NC}"',
-            'echo "="*80',
-        ])
+        lines.extend(
+            [
+                'echo ""',
+                f'echo {"="*80}',
+                'echo "${GREEN}Test completed${NC}"',
+                f'echo {"="*80}',
+            ]
+        )
 
         try:
             with open(output_file, "w") as f:

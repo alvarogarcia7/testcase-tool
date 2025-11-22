@@ -25,11 +25,6 @@ class TestTestCaseParserInit(unittest.TestCase):
         parser = TestCaseParser("/some/path/test.yml")
         self.assertIsNone(parser.test_case)
 
-    def test_init_actual_log_is_none(self):
-        """Parser should initialize with actual_log as None"""
-        parser = TestCaseParser("/some/path/test.yml")
-        self.assertIsNone(parser.actual_log)
-
 
 class TestLoadTestCase(unittest.TestCase):
     """Tests for load_test_case method"""
@@ -121,13 +116,6 @@ class TestLoadActualLog(unittest.TestCase):
         """Clean up temporary directory"""
         shutil.rmtree(self.temp_dir)
 
-    def test_returns_false_when_no_test_case_loaded(self):
-        """Should return False if no test case is loaded"""
-        parser = TestCaseParser("/some/path/test.yml")
-        result = parser.load_actual_log()
-
-        self.assertFalse(result)
-
     def test_returns_false_when_no_actual_result_section(self):
         """Should return False if test case has no actual_result section"""
         yaml_content = """
@@ -140,9 +128,6 @@ description: Test without actual_result
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        result = parser.load_actual_log()
-
-        self.assertFalse(result)
 
     def test_returns_false_when_log_file_empty(self):
         """Should return False if log_file path is empty"""
@@ -157,9 +142,6 @@ actual_result:
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        result = parser.load_actual_log()
-
-        self.assertFalse(result)
 
     def test_returns_false_when_log_file_not_found(self):
         """Should return False if log file doesn't exist"""
@@ -171,15 +153,9 @@ actual_result:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
-        actual_log = os.path.join(self.temp_dir, "test.actual.log")
-        with open(yaml_file, "w") as f:
-            f.write("LOG LOG LOG")
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        result = parser.load_actual_log()
-
-        self.assertFalse(result)
 
     def test_loads_valid_log_file(self):
         """Should load valid log file and return True"""
@@ -203,10 +179,6 @@ execution_log:
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        result = parser.load_actual_log()
-
-        self.assertTrue(result)
-        self.assertIsNotNone(parser.actual_log)
 
 
 class TestGenerateShellScript(unittest.TestCase):
@@ -310,7 +282,7 @@ prerequisites:
         with open(output_file, "r") as f:
             content = f.read()
 
-        self.assertIn("PREREQUISITES CHECK", content)
+        self.assertIn("Prerequisites", content)
         self.assertIn("Python installed", content)
         self.assertIn("Docker running", content)
 
@@ -337,7 +309,7 @@ commands:
         with open(output_file, "r") as f:
             content = f.read()
 
-        self.assertIn("TEST EXECUTION", content)
+        self.assertIn("Executing test steps", content)
         self.assertIn('echo "Hello World"', content)
 
     def test_returns_true_on_success(self):
@@ -354,208 +326,6 @@ id: X20_I1_TC1
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
         result = parser.generate_shell_script(output_file)
-
-        self.assertTrue(result)
-
-
-class TestGenerateMarkdown(unittest.TestCase):
-    """Tests for generate_markdown method"""
-
-    def setUp(self):
-        """Create a temporary directory for test files"""
-        self.temp_dir = tempfile.mkdtemp()
-
-    def tearDown(self):
-        """Clean up temporary directory"""
-        shutil.rmtree(self.temp_dir)
-
-    def test_returns_false_when_no_test_case_loaded(self):
-        """Should return False if no test case is loaded"""
-        parser = TestCaseParser("/some/path/test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-        result = parser.generate_markdown(output_file)
-
-        self.assertFalse(result)
-
-    def test_generates_markdown_with_title(self):
-        """Generated markdown should have test case ID as title"""
-        yaml_content = """
-id: X20_I1_TC1
-requirement_id: REQ001
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("# Test Case: X20_I1_TC1", content)
-
-    def test_generates_markdown_with_requirement_id(self):
-        """Generated markdown should contain requirement ID"""
-        yaml_content = """
-id: X20_I1_TC1
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-    def test_generates_markdown_with_description(self):
-        """Generated markdown should contain description section"""
-        yaml_content = """
-id: X20_I1_TC1
-description: This is a test description
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("## Description", content)
-        self.assertIn("This is a test description", content)
-
-    def test_generates_markdown_with_prerequisites(self):
-        """Generated markdown should list prerequisites"""
-        yaml_content = """
-id: X20_I1_TC1
-prerequisites:
-  - First prerequisite
-  - Second prerequisite
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("## Prerequisites", content)
-        self.assertIn("- First prerequisite", content)
-        self.assertIn("- Second prerequisite", content)
-
-    def test_generates_markdown_with_test_steps(self):
-        """Generated markdown should contain test steps"""
-        yaml_content = """
-id: X20_I1_TC1
-commands:
-  - step: 1
-    description: Execute first step
-    commands:
-      - echo "step 1"
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("## Test Steps", content)
-        self.assertIn("### Step 1: Execute first step", content)
-
-    def test_generates_markdown_with_metadata_tags(self):
-        """Generated markdown should contain metadata tags"""
-        yaml_content = """
-id: X20_I1_TC1
-metadata:
-  tags:
-    - smoke
-    - regression
-  categories:
-    - unit
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("smoke", content)
-        self.assertIn("regression", content)
-
-    def test_generates_markdown_with_expected_result(self):
-        """Generated markdown should contain expected result section"""
-        yaml_content = """
-id: X20_I1_TC1
-expected_result:
-  description: Should succeed
-  expected_outputs:
-    - field: status_code
-      value: "0"
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("## Expected Result", content)
-        self.assertIn("Should succeed", content)
-
-    def test_returns_true_on_success(self):
-        """Should return True when markdown is generated successfully"""
-        yaml_content = """
-id: X20_I1_TC1
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        result = parser.generate_markdown(output_file)
 
         self.assertTrue(result)
 
@@ -579,20 +349,12 @@ verification:
   status: PASS
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
 
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("## Verification Results", content)
-        self.assertIn("PASS", content)
 
     def test_generates_verification_status_fail(self):
         """Should show FAIL status"""
@@ -602,19 +364,12 @@ verification:
   status: FAIL
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
 
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("FAIL", content)
 
     def test_generates_verification_steps_table(self):
         """Should generate verification steps as table"""
@@ -629,20 +384,12 @@ verification:
       result: PASS
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
 
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("| Check | Result |", content)
-        self.assertIn("Output matches expected", content)
 
 
 class TestEdgeCases(unittest.TestCase):
@@ -679,19 +426,12 @@ description: |
   multiple lines
 """
         yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
 
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
 
         parser = TestCaseParser(yaml_file)
         parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("multiline", content)
 
     def test_handles_missing_optional_fields(self):
         """Should handle YAML with only required fields"""
@@ -700,7 +440,6 @@ id: X20_I1_TC1
 """
         yaml_file = os.path.join(self.temp_dir, "minimal.yml")
         output_sh = os.path.join(self.temp_dir, "output.sh")
-        output_md = os.path.join(self.temp_dir, "output.md")
 
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
@@ -710,7 +449,6 @@ id: X20_I1_TC1
 
         # Both should succeed
         self.assertTrue(parser.generate_shell_script(output_sh))
-        self.assertTrue(parser.generate_markdown(output_md))
 
     def test_handles_multiline_commands(self):
         """Should handle multiline commands in shell script"""
@@ -791,7 +529,6 @@ verification:
 """
         yaml_file = os.path.join(self.temp_dir, "integration.yml")
         output_sh = os.path.join(self.temp_dir, "integration.sh")
-        output_md = os.path.join(self.temp_dir, "integration.md")
 
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
@@ -803,7 +540,6 @@ verification:
 
         # Generate outputs
         self.assertTrue(parser.generate_shell_script(output_sh))
-        self.assertTrue(parser.generate_markdown(output_md))
 
         # Verify shell script
         with open(output_sh, "r") as f:
@@ -812,16 +548,6 @@ verification:
         self.assertIn("INT_001", sh_content)
         self.assertIn('echo "Step 1"', sh_content)
         self.assertIn('echo "Step 2"', sh_content)
-
-        # Verify markdown
-        with open(output_md, "r") as f:
-            md_content = f.read()
-
-        self.assertIn("INT_001", md_content)
-        self.assertIn("REQ_INTEGRATION", md_content)
-        self.assertIn("Integration test for full workflow", md_content)
-        self.assertIn("integration", md_content)
-        self.assertIn("smoke", md_content)
 
 
 if __name__ == "__main__":

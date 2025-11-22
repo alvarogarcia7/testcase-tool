@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from jsonschema import Draft7Validator, ValidationError
+from jsonschema import Draft7Validator
 
 
 def load_schema(schema_path: str | Path | None = None) -> dict:
