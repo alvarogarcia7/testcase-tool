@@ -1,164 +1,152 @@
-# Test Case YAML Structure Documentation
+# Test Case Parser - Shell Script Generator
 
-## Overview
-This document describes the YAML structure for test case documentation. Each test case is stored in a separate YAML file with a standardized format.
+A lightweight Python tool that converts YAML test case definitions into executable shell scripts.
 
-## File Naming Convention
-- Format: `<RequirementID>_<TestCaseID>.yml`
-- Example: `X20_1.yml`, `AUTH_05.yml`, `API_12.yml`
+## Features
 
-## Structure
+- Parse YAML test case files
+- Generate executable shell scripts from test definitions
+- Support for environment variable expansion (`$VAR` and `${VAR}` syntax)
+- Clean, minimal codebase focused on shell script generation
 
-### 1. Test Case Identification
-```yaml
-testcase_id: "X20_1"      # Unique test case identifier
-requirement_id: "X20"      # Associated requirement
+## Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd testcase-tool
+
+# Create virtual environment (optional but recommended)
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install pyyaml
 ```
 
-### 2. Metadata
-```yaml
-metadata:
-  tags:                    # Flexible tags for filtering/searching
-    - "integration"
-    - "smoke"
-    - "regression"
-  categories:              # Hierarchical categorization
-    - "authentication"
-    - "api"
+## Usage
+
+### Command Line
+
+```bash
+python testcase_parser.py <testcase.yml> [output_dir]
 ```
 
-### 3. Description
-Multi-line text describing the test purpose and scope.
+Examples:
+```bash
+# Generate script in current directory
+python testcase_parser.py test.yml
 
-### 4. Prerequisites
-List of conditions that must be met before test execution:
-```yaml
-prerequisites:
-  - "Database is running"
-  - "User account exists"
+# Generate script in specific directory
+python testcase_parser.py test.yml ./output/
 ```
 
-### 5. Commands
-Sequence of commands to execute:
+### Environment Variable Expansion
+
+The parser supports environment variable expansion in commands:
+
 ```yaml
 commands:
-  - step: 1                          # Sequential step number
-    description: "Optional description"  # Human-readable step description
-    command: "actual command"         # Command to execute
-    expected_status: 0                # Optional expected return code
-    notes: "Optional notes"           # Additional context
+  - step: 1
+    description: Use API token
+    commands:
+      - curl -H "Authorization: Bearer ${API_TOKEN}" https://api.example.com
 ```
 
-### 6. Expected Result
-What should happen when test executes correctly:
+When run with `export API_TOKEN="secret123"`, the generated script will contain:
+```bash
+curl -H "Authorization: Bearer secret123" https://api.example.com
+```
+
+Both `$VAR` and `${VAR}` syntax are supported. Undefined variables are left unchanged.
+
+### Demo
+
+Run the included demo script:
+```bash
+./demo.sh
+```
+
+## YAML Structure
+
+### Minimal Example
+
 ```yaml
-expected_result:
-  description: |                      # Narrative description
-    What should happen...
-
-  expected_outputs:                   # Specific values to check
-    - field: "status_code"
-      value: 200
-    - field: "response.token"
-      condition: "is not null"
-
-  verification_commands:              # Commands to verify results
-    - description: "Check token"
-      command: "jwt decode $TOKEN"
+testcase_id: TC001
+commands:
+  - step: 1
+    description: Run basic test
+    commands:
+      - echo "Hello World"
 ```
 
-### 7. Actual Result
-Log of what actually happened during execution:
+### Complete Example
+
 ```yaml
-actual_result:
-  execution_log:
-    - timestamp: "2025-01-15T10:30:00Z"  # ISO 8601 format
-      step: 1                             # Corresponds to command step
-      command: "command that was run"
-      output: |                           # Actual output
-        Command output here
-      status_code: 0                      # Return code
-      duration_ms: 3420                   # Execution time in milliseconds
+testcase_id: API_001
+requirement_id: REQ_API_001
+description: Test API endpoint functionality
+
+prerequisites:
+  - API server is running
+  - Valid credentials available
+
+commands:
+  - step: 1
+    description: Test GET endpoint
+    commands:
+      - curl -X GET https://api.example.com/users
+
+  - step: 2
+    description: Test POST with authentication
+    commands:
+      - |
+        curl -X POST https://api.example.com/users \
+          -H "Authorization: Bearer ${API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          -d '{"name": "Test User"}'
+
+verification_commands:
+  - description: Verify response
+    commands:
+      - test -f response.json
+      - jq '.status' response.json
 ```
 
-**Suggested Format:**
-- Use ISO 8601 timestamps
-- Include full command output for debugging
-- Record status codes and duration for performance tracking
-- Can be populated manually or by automation tools
+## Generated Script Features
 
-### 8. Verification
-Final test results and analysis:
-```yaml
-verification:
-  status: "PASS"                      # PASS, FAIL, BLOCKED, SKIPPED
+The generated shell scripts include:
+- Bash shebang (`#!/bin/bash`)
+- Color-coded output (green, yellow, red)
+- `set -e` for error handling
+- Step-by-step execution with descriptions
+- Prerequisites display
+- Verification commands
+- Executable permissions (chmod 755)
 
-  verification_steps:                 # Individual checks performed
-    - check: "Description of check"
-      result: "PASS"                  # PASS or FAIL
+## Testing
 
-  comments: |                         # Overall assessment
-    Analysis and observations
-
-  executed_by: "user@example.com"     # Who ran the test
-  execution_date: "2025-01-15T10:30:00Z"
-  environment: "staging"              # Where it was run
-
-  issues:                             # Problems found
-    - issue_id: "BUG-123"
-      description: "Brief description"
-      severity: "HIGH"                # CRITICAL, HIGH, MEDIUM, LOW
-
-  notes: |                            # Additional notes
-    Any other relevant information
+Run the test suite:
+```bash
+python test_testcase_parser.py
 ```
 
-## Usage Guidelines
+All tests use Python's built-in `unittest` module, no external dependencies required.
 
-### For Test Authors
-1. Create one YAML file per test case
-2. Use clear, descriptive names for IDs and descriptions
-3. Keep prerequisites specific and measurable
-4. Write commands that can be copy-pasted and executed
-5. Define clear, verifiable expected results
+## Code Statistics
 
-### For Test Executors
-1. Check all prerequisites before starting
-2. Execute commands in sequence
-3. Record exact outputs in `actual_result` section
-4. Complete all verification steps
-5. Update `verification` section with results
+- Main parser: ~159 lines (simplified from 312)
+- Tests: ~502 lines (focused on core functionality)
+- Zero unnecessary complexity
+- Single responsibility: YAML to Shell
 
-### For Automation
-The YAML structure supports both manual and automated testing:
-- `commands` section can be parsed and executed by scripts
-- `actual_result` can be populated automatically
-- `verification_steps` can be automated with assertions
+## Development
 
-## Examples
+This is a simplified version focused solely on shell script generation. Previous features removed:
+- Markdown documentation generation
+- Actual log parsing and integration
+- Complex helper functions
 
-See the following example files:
-- `testcase_template.yml` - Comprehensive template with all options
-- `X20_1_example.yml` - Filled example with realistic data
+## License
 
-## Best Practices
-
-1. **Be Specific**: Avoid vague descriptions; use concrete, measurable criteria
-2. **Keep It Current**: Update test cases when requirements change
-3. **Version Control**: Store YAML files in Git for change tracking
-4. **Consistency**: Use consistent formatting and terminology across test cases
-5. **Completeness**: Fill in all sections, even if some are marked as empty/N/A
-
-## Status Values
-
-### Test Status
-- `PASS`: All verification steps passed
-- `FAIL`: One or more verification steps failed
-- `BLOCKED`: Cannot execute due to external dependencies
-- `SKIPPED`: Intentionally not executed
-
-### Issue Severity
-- `CRITICAL`: System crash, data loss, security vulnerability
-- `HIGH`: Major functionality broken
-- `MEDIUM`: Moderate impact on functionality
-- `LOW`: Minor issue, cosmetic problem
+See LICENSE file for details.
