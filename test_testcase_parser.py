@@ -172,7 +172,7 @@ actual_result:
         yaml_file = os.path.join(self.temp_dir, "test.yml")
         with open(yaml_file, "w") as f:
             f.write(yaml_content)
-        os.path.join(self.temp_dir, "test.actual.log")
+        yaml_file = os.path.join(self.temp_dir, "test.actual.log")
         with open(yaml_file, "w") as f:
             f.write("LOG LOG LOG")
 
