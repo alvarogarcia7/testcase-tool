@@ -1,7 +1,7 @@
 # Test Case: User Login Authentication
 # X20_1 - Basic login functionality test
 
-testcase_id: "X20_I1_TC1"
+id: "X20_I1_TC1"
 
 metadata:
   tags:
