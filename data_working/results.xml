@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="15" skipped="0" tests="130" time="0.596" timestamp="2025-12-10T16:32:34.507825+04:00" hostname="alvaros-MBP-M2.home"><testcase classname="test_kiwi_tcms_downloader.TestKiwiTCMSDownloaderInit" name="test_init_creates_opener" time="0.007" /><testcase classname="test_kiwi_tcms_downloader.TestKiwiTCMSDownloaderInit" name="test_init_stores_base_url" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestKiwiTCMSDownloaderInit" name="test_init_stores_base_url_strips_trailing_slash" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestKiwiTCMSDownloaderInit" name="test_init_stores_password" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestKiwiTCMSDownloaderInit" name="test_init_stores_username" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestKiwiTCMSDownloaderInit" name="test_setup_auth_creates_opener" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestMakeRequest" name="test_make_request_constructs_correct_url" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestMakeRequest" name="test_make_request_handles_post_data" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestMakeRequest" name="test_make_request_raises_on_http_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestMakeRequest" name="test_make_request_raises_on_url_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestMakeRequest" name="test_make_request_returns_json" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestMakeRequest" name="test_make_request_sets_correct_headers" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestRun" name="test_download_test_run_calls_correct_endpoints" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestRun" name="test_download_test_run_handles_empty_executions" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestRun" name="test_download_test_run_handles_non_list_executions" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestRun" name="test_download_test_run_returns_none_on_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestRun" name="test_download_test_run_returns_run_data" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestPlan" name="test_download_test_plan_calls_correct_endpoints" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestPlan" name="test_download_test_plan_handles_empty_runs" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestPlan" name="test_download_test_plan_handles_non_list_runs" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestPlan" name="test_download_test_plan_returns_none_on_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestPlan" name="test_download_test_plan_returns_plan_data" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestCase" name="test_download_test_case_calls_correct_endpoint" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestCase" name="test_download_test_case_returns_case_data" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestDownloadTestCase" name="test_download_test_case_returns_none_on_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsYAML" name="test_save_as_yaml_creates_file" time="0.002" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsYAML" name="test_save_as_yaml_returns_false_for_empty_data" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsYAML" name="test_save_as_yaml_returns_false_on_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsYAML" name="test_save_as_yaml_writes_correct_content" time="0.008" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsJSON" name="test_save_as_json_creates_file" time="0.002" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsJSON" name="test_save_as_json_indents_output" time="0.006" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsJSON" name="test_save_as_json_returns_false_for_empty_data" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsJSON" name="test_save_as_json_returns_false_on_error" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsJSON" name="test_save_as_json_writes_correct_content" time="0.005" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_creates_file" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_flattens_nested_dict" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_handles_dict_with_executions" time="0.004" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_handles_dict_with_test_runs" time="0.002" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_returns_false_for_empty_data" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_returns_false_for_empty_rows" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_writes_data_rows" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsCSV" name="test_save_as_csv_writes_headers" time="0.005" /><testcase classname="test_kiwi_tcms_downloader.TestFlattenDict" name="test_flatten_dict_custom_separator" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFlattenDict" name="test_flatten_dict_nested_dict" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFlattenDict" name="test_flatten_dict_simple_dict" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFlattenDict" name="test_flatten_dict_with_list" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsMarkdown" name="test_save_as_markdown_creates_file" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsMarkdown" name="test_save_as_markdown_formats_test_case" time="0.002" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsMarkdown" name="test_save_as_markdown_formats_test_plan" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsMarkdown" name="test_save_as_markdown_formats_test_run" time="0.005" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsMarkdown" name="test_save_as_markdown_returns_false_for_empty_data" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestSaveAsMarkdown" name="test_save_as_markdown_returns_false_on_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestPlanMarkdown" name="test_format_test_plan_markdown_includes_description" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestPlanMarkdown" name="test_format_test_plan_markdown_includes_id" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestPlanMarkdown" name="test_format_test_plan_markdown_includes_name" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestPlanMarkdown" name="test_format_test_plan_markdown_includes_test_runs" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestPlanMarkdown" name="test_format_test_plan_markdown_limits_runs_display" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestRunMarkdown" name="test_format_test_run_markdown_includes_execution_counts" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestRunMarkdown" name="test_format_test_run_markdown_includes_id" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestRunMarkdown" name="test_format_test_run_markdown_includes_notes" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestRunMarkdown" name="test_format_test_run_markdown_includes_summary" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestCaseMarkdown" name="test_format_test_case_markdown_includes_id" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestCaseMarkdown" name="test_format_test_case_markdown_includes_sections" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestCaseMarkdown" name="test_format_test_case_markdown_includes_summary" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestFormatTestCaseMarkdown" name="test_format_test_case_markdown_skips_empty_sections" time="0.000" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestRun" name="test_export_test_run_creates_output_directory" time="0.002" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestRun" name="test_export_test_run_handles_unknown_format" time="0.005" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestRun" name="test_export_test_run_returns_false_on_download_failure" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestRun" name="test_export_test_run_saves_all_formats" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestRun" name="test_export_test_run_uses_default_formats" time="0.005" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestPlan" name="test_export_test_plan_creates_output_directory" time="0.004" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestPlan" name="test_export_test_plan_returns_false_on_download_failure" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestPlan" name="test_export_test_plan_saves_all_formats" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestCase" name="test_export_test_case_creates_output_directory" time="0.002" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestCase" name="test_export_test_case_returns_false_on_download_failure" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestExportTestCase" name="test_export_test_case_saves_specified_formats" time="0.002" /><testcase classname="test_kiwi_tcms_downloader.TestAuthenticationErrors" name="test_handles_401_unauthorized" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestAuthenticationErrors" name="test_handles_403_forbidden" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestNetworkErrors" name="test_handles_connection_timeout" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestNetworkErrors" name="test_handles_dns_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestAPIErrors" name="test_handles_404_not_found" time="0.004" /><testcase classname="test_kiwi_tcms_downloader.TestAPIErrors" name="test_handles_500_server_error" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestAPIErrors" name="test_handles_invalid_json_response" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestEdgeCases" name="test_handles_deeply_nested_dictionaries" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestEdgeCases" name="test_handles_empty_lists_and_dicts" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestEdgeCases" name="test_handles_empty_string_run_id" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestEdgeCases" name="test_handles_large_data_export" time="0.007" /><testcase classname="test_kiwi_tcms_downloader.TestEdgeCases" name="test_handles_none_values_in_data" time="0.005" /><testcase classname="test_kiwi_tcms_downloader.TestEdgeCases" name="test_handles_special_characters_in_filenames" time="0.001" /><testcase classname="test_kiwi_tcms_downloader.TestEdgeCases" name="test_handles_unicode_in_data" time="0.003" /><testcase classname="test_kiwi_tcms_downloader.TestIntegration" name="test_full_test_case_export_workflow" time="0.004" /><testcase classname="test_kiwi_tcms_downloader.TestIntegration" name="test_full_test_plan_export_workflow" time="0.004" /><testcase classname="test_kiwi_tcms_downloader.TestIntegration" name="test_full_test_run_export_workflow" time="0.008" /><testcase classname="test_testcase_parser.TestTestCaseParserInit" name="test_init_actual_log_is_none" time="0.000" /><testcase classname="test_testcase_parser.TestTestCaseParserInit" name="test_init_stores_yaml_file_path" time="0.000" /><testcase classname="test_testcase_parser.TestTestCaseParserInit" name="test_init_test_case_is_none" time="0.000" /><testcase classname="test_testcase_parser.TestLoadTestCase" name="test_load_invalid_yaml_returns_false" time="0.003" /><testcase classname="test_testcase_parser.TestLoadTestCase" name="test_load_nonexistent_file_returns_false" time="0.001" /><testcase classname="test_testcase_parser.TestLoadTestCase" name="test_load_valid_yaml_populates_test_case" time="0.005" /><testcase classname="test_testcase_parser.TestLoadTestCase" name="test_load_valid_yaml_returns_true" time="0.007" /><testcase classname="test_testcase_parser.TestLoadTestCase" name="test_load_yaml_with_prerequisites_list" time="0.005" /><testcase classname="test_testcase_parser.TestLoadActualLog" name="test_loads_valid_log_file" time="0.008" /><testcase classname="test_testcase_parser.TestLoadActualLog" name="test_returns_false_when_log_file_empty" time="0.006" /><testcase classname="test_testcase_parser.TestLoadActualLog" name="test_returns_false_when_log_file_not_found" time="0.005"><failure message="AssertionError: Log file '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpwkh6j39h/nonexistent.log' does not exist">self = &lt;test_testcase_parser.TestLoadActualLog testMethod=test_returns_false_when_log_file_not_found&gt;
+
+        def test_returns_false_when_log_file_not_found(self):
+            """Should return False if log file doesn't exist"""
+            yaml_content = """
+    testcase_id: TC001
+    actual_result:
+      log_file: nonexistent.log
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           result = parser.load_actual_log()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_testcase_parser.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x10656e810&gt;
+
+    def load_actual_log(self):
+        log_file = G(self.test_case, "actual_result", "log_file")
+        if not log_file:
+            return False
+        log_path = Path(self.yaml_file).parent / log_file
+&gt;       assert log_path.exists(), f"Log file '{log_path}' does not exist"
+               ^^^^^^^^^^^^^^^^^
+E       AssertionError: Log file '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpwkh6j39h/nonexistent.log' does not exist
+
+testcase_parser.py:38: AssertionError</failure></testcase><testcase classname="test_testcase_parser.TestLoadActualLog" name="test_returns_false_when_no_actual_result_section" time="0.006" /><testcase classname="test_testcase_parser.TestLoadActualLog" name="test_returns_false_when_no_test_case_loaded" time="0.001" /><testcase classname="test_testcase_parser.TestGenerateShellScript" name="test_generates_commands_section" time="0.009" /><testcase classname="test_testcase_parser.TestGenerateShellScript" name="test_generates_prerequisites_section" time="0.009" /><testcase classname="test_testcase_parser.TestGenerateShellScript" name="test_generates_script_with_shebang" time="0.008" /><testcase classname="test_testcase_parser.TestGenerateShellScript" name="test_generates_script_with_testcase_id" time="0.008" /><testcase classname="test_testcase_parser.TestGenerateShellScript" name="test_returns_false_when_no_test_case_loaded" time="0.001" /><testcase classname="test_testcase_parser.TestGenerateShellScript" name="test_returns_true_on_success" time="0.005" /><testcase classname="test_testcase_parser.TestGenerateShellScript" name="test_script_is_executable" time="0.009" /><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_generates_markdown_with_description" time="0.008"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_generates_markdown_with_description&gt;
+
+        def test_generates_markdown_with_description(self):
+            """Generated markdown should contain description section"""
+            yaml_content = """
+    testcase_id: TC001
+    description: This is a test description
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:436: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106c44350&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpbcz61z9b/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_generates_markdown_with_expected_result" time="0.007"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_generates_markdown_with_expected_result&gt;
+
+        def test_generates_markdown_with_expected_result(self):
+            """Generated markdown should contain expected result section"""
+            yaml_content = """
+    testcase_id: TC001
+    expected_result:
+      description: Should succeed
+      expected_outputs:
+        - field: status_code
+          value: "0"
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:540: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106532fd0&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmp6j3ych4t/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_generates_markdown_with_metadata_tags" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_generates_markdown_with_metadata_tags&gt;
+
+        def test_generates_markdown_with_metadata_tags(self):
+            """Generated markdown should contain metadata tags"""
+            yaml_content = """
+    testcase_id: TC001
+    metadata:
+      tags:
+        - smoke
+        - regression
+      categories:
+        - unit
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:514: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x10651ad90&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpcaouyvcb/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_generates_markdown_with_prerequisites" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_generates_markdown_with_prerequisites&gt;
+
+        def test_generates_markdown_with_prerequisites(self):
+            """Generated markdown should list prerequisites"""
+            yaml_content = """
+    testcase_id: TC001
+    prerequisites:
+      - First prerequisite
+      - Second prerequisite
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:460: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x1064d3150&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpl5f44utu/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_generates_markdown_with_requirement_id" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_generates_markdown_with_requirement_id&gt;
+
+        def test_generates_markdown_with_requirement_id(self):
+            """Generated markdown should contain requirement ID"""
+            yaml_content = """
+    testcase_id: TC001
+    requirement_id: REQ_UNIQUE_456
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:415: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x105fa78d0&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpkvwgnjcw/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_generates_markdown_with_test_steps" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_generates_markdown_with_test_steps&gt;
+
+        def test_generates_markdown_with_test_steps(self):
+            """Generated markdown should contain test steps"""
+            yaml_content = """
+    testcase_id: TC001
+    commands:
+      - step: 1
+        description: Execute first step
+        commands:
+          - echo "step 1"
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:487: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x1064dc350&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmptpty_az9/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_generates_markdown_with_title" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_generates_markdown_with_title&gt;
+
+        def test_generates_markdown_with_title(self):
+            """Generated markdown should have test case ID as title"""
+            yaml_content = """
+    testcase_id: TC_MARKDOWN_001
+    requirement_id: REQ001
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:394: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x105f456d0&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmp0kb8bqso/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_returns_false_when_no_test_case_loaded" time="0.001" /><testcase classname="test_testcase_parser.TestGenerateMarkdown" name="test_returns_true_on_success" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestGenerateMarkdown testMethod=test_returns_true_on_success&gt;
+
+        def test_returns_true_on_success(self):
+            """Should return True when markdown is generated successfully"""
+            yaml_content = """
+    testcase_id: TC001
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           result = parser.generate_markdown(output_file)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_testcase_parser.py:561: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106500550&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpc949zrr1/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestVerificationSection" name="test_generates_verification_status_fail" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestVerificationSection testMethod=test_generates_verification_status_fail&gt;
+
+        def test_generates_verification_status_fail(self):
+            """Should show FAIL status"""
+            yaml_content = """
+    testcase_id: TC001
+    verification:
+      status: FAIL
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:615: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106c61dd0&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmp84aogxgl/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestVerificationSection" name="test_generates_verification_status_pass" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestVerificationSection testMethod=test_generates_verification_status_pass&gt;
+
+        def test_generates_verification_status_pass(self):
+            """Should show PASS status"""
+            yaml_content = """
+    testcase_id: TC001
+    verification:
+      status: PASS
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:592: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106614c50&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmp7nryzg1v/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestVerificationSection" name="test_generates_verification_steps_table" time="0.006"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestVerificationSection testMethod=test_generates_verification_steps_table&gt;
+
+        def test_generates_verification_steps_table(self):
+            """Should generate verification steps as table"""
+            yaml_content = """
+    testcase_id: TC001
+    verification:
+      status: PASS
+      verification_steps:
+        - check: Output matches expected
+          result: PASS
+        - check: Exit code is 0
+          result: PASS
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:642: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x10656e710&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmp3rexk32x/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestEdgeCases" name="test_handles_empty_yaml_file" time="0.002" /><testcase classname="test_testcase_parser.TestEdgeCases" name="test_handles_missing_optional_fields" time="0.005"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestEdgeCases testMethod=test_handles_missing_optional_fields&gt;
+
+        def test_handles_missing_optional_fields(self):
+            """Should handle YAML with only required fields"""
+            yaml_content = """
+    testcase_id: TC001
+    """
+            yaml_file = os.path.join(self.temp_dir, "minimal.yml")
+            output_sh = os.path.join(self.temp_dir, "output.sh")
+            output_md = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+    
+            # Both should succeed
+            self.assertTrue(parser.generate_shell_script(output_sh))
+&gt;           self.assertTrue(parser.generate_markdown(output_md))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_testcase_parser.py:716: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106c35950&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmp9p_6o2c6/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestEdgeCases" name="test_handles_multiline_commands" time="0.008" /><testcase classname="test_testcase_parser.TestEdgeCases" name="test_handles_multiline_description" time="0.005"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestEdgeCases testMethod=test_handles_multiline_description&gt;
+
+        def test_handles_multiline_description(self):
+            """Should handle multiline description correctly"""
+            yaml_content = """
+    testcase_id: TC001
+    description: |
+      This is a multiline
+      description that spans
+      multiple lines
+    """
+            yaml_file = os.path.join(self.temp_dir, "test.yml")
+            output_file = os.path.join(self.temp_dir, "output.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+            parser.load_test_case()
+&gt;           parser.generate_markdown(output_file)
+
+test_testcase_parser.py:692: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106c7be50&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmpbn9sel8m/output.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase><testcase classname="test_testcase_parser.TestIntegration" name="test_full_workflow_with_complete_yaml" time="0.008"><failure message="AttributeError: 'NoneType' object has no attribute 'split'">self = &lt;test_testcase_parser.TestIntegration testMethod=test_full_workflow_with_complete_yaml&gt;
+
+        def test_full_workflow_with_complete_yaml(self):
+            """Test full parsing workflow with comprehensive YAML"""
+            yaml_content = """
+    testcase_id: INT_001
+    requirement_id: REQ_INTEGRATION
+    metadata:
+      tags:
+        - integration
+        - smoke
+      categories:
+        - e2e
+    description: Integration test for full workflow
+    prerequisites:
+      - Python 3.8+
+      - Write permissions
+    commands:
+      - step: 1
+        description: First step
+        commands:
+          - echo "Step 1"
+        expected_status: 0
+      - step: 2
+        description: Second step
+        commands:
+          - echo "Step 2"
+    expected_result:
+      description: All steps should complete successfully
+      expected_outputs:
+        - field: exit_code
+          value: "0"
+    verification:
+      status: PASS
+      verification_steps:
+        - check: All steps completed
+          result: PASS
+    """
+            yaml_file = os.path.join(self.temp_dir, "integration.yml")
+            output_sh = os.path.join(self.temp_dir, "integration.sh")
+            output_md = os.path.join(self.temp_dir, "integration.md")
+    
+            with open(yaml_file, "w") as f:
+                f.write(yaml_content)
+    
+            parser = TestCaseParser(yaml_file)
+    
+            # Load test case
+            self.assertTrue(parser.load_test_case())
+    
+            # Generate outputs
+            self.assertTrue(parser.generate_shell_script(output_sh))
+&gt;           self.assertTrue(parser.generate_markdown(output_md))
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+test_testcase_parser.py:809: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;testcase_parser.TestCaseParser object at 0x106c5a450&gt;
+output_file = '/var/folders/t_/pkxqxnyn7_q55btl47rbv8p00000gn/T/tmp1n5pxsc3/integration.md'
+
+    def generate_markdown(self, output_file):
+        if not self.test_case:
+            print("Error: No test case loaded")
+            return False
+        tc = self.test_case
+&gt;       tc_parts = tc.get("id").split("TC")
+                   ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'split'
+
+testcase_parser.py:169: AttributeError</failure></testcase></testsuite></testsuites>
