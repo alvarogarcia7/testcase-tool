@@ -6,3 +6,6 @@ __pycache__/
 !*.actual.log
 
 tmp/
+
+# Python virtual environment
+.venv/
