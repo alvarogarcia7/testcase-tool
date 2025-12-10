@@ -1,3 +1,5 @@
+Result code: 0
+Standard Output (starting on the new line):
 # Test Plan: Multi-line Description Plan
 
 **Plan ID:** 13001
@@ -28,3 +30,5 @@ Total test runs: 1
 - **Run 1301**: Run with notes
 
 
+
+Standard Error (starting on the new line):

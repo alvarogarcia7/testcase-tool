@@ -1,3 +1,5 @@
+Result code: 0
+Standard Output (starting on the new line):
 # Test Plan: Untitled
 
 **Plan ID:** N/A
@@ -16,3 +18,5 @@ No description provided
 
 No test runs associated with this test plan.
 
+
+Standard Error (starting on the new line):

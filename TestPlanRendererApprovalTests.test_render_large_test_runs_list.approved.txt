@@ -1,3 +1,5 @@
+Result code: 0
+Standard Output (starting on the new line):
 # Test Plan: Large Test Plan
 
 **Plan ID:** 12001
@@ -118,3 +120,5 @@ Total test runs: 50
 - **Run 12049**: Test Run 50
 
 
+
+Standard Error (starting on the new line):

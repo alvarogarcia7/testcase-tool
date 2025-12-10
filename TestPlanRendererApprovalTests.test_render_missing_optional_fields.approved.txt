@@ -1,3 +1,5 @@
+Result code: 0
+Standard Output (starting on the new line):
 # Test Plan: Plan with Missing Fields
 
 **Plan ID:** 7001
@@ -22,3 +24,5 @@ Total test runs: 2
 - **Run 702**: No summary
 
 
+
+Standard Error (starting on the new line):

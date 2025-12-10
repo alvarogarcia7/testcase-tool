@@ -9,7 +9,8 @@ import unittest
 
 import approvaltests.approvals
 from approvaltests import verify
-from approvaltests.reporters import PythonNativeReporter
+from approvaltests.namer import NamerFactory
+from approvaltests.reporters import PythonNativeReporter  # , ReporterThatAutomaticallyApproves
 
 
 class TestPlanRendererApprovalTests(unittest.TestCase):
@@ -19,15 +20,25 @@ class TestPlanRendererApprovalTests(unittest.TestCase):
         self.temp_dir = tempfile.mkdtemp()
         self.maxDiff = None
         approvaltests.approvals.set_default_reporter(PythonNativeReporter())
+        # approvaltests.approvals.set_default_reporter(ReporterThatAutomaticallyApproves())
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
 
     def _run_cli(self, *args):
+        result = self._run_cli_result(*args)
+        return f"""\
+Result code: {result.returncode}
+Standard Output (starting on the new line):
+{result.stdout}
+Standard Error (starting on the new line):
+{result.stderr}"""
+
+    def _run_cli_result(self, *args):
         """Run testplan_renderer.py CLI and return stdout, stderr, and return code."""
         cmd = [sys.executable, "testplan_renderer.py"] + list(args)
         result = subprocess.run(cmd, capture_output=True, text=True)
-        return result.stdout, result.stderr, result.returncode
+        return result
 
     def _create_test_plan_json(self, filename, data):
         """Create a test plan JSON file in temp directory."""
@@ -52,13 +63,7 @@ class TestPlanRendererApprovalTests(unittest.TestCase):
 
     def test_render_with_default_template_and_real_data(self):
         """Test rendering exported_testplans.json with default template."""
-        if not os.path.exists("exported_testplans.json"):
-            self.skipTest("exported_testplans.json not found")
-
-        stdout, stderr, returncode = self._run_cli("exported_testplans.json")
-
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
-        verify(stdout)
+        verify(self._run_cli("exported_testplans.json"))
 
     def test_render_with_default_template_to_file(self):
         """Test rendering to output file with default template."""
@@ -80,9 +85,9 @@ class TestPlanRendererApprovalTests(unittest.TestCase):
         input_file = self._create_test_plan_json("testplan.json", test_data)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        stdout, stderr, returncode = self._run_cli(input_file, output_file)
+        result = self._run_cli_result(input_file, output_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(result.returncode, 0)
         self.assertTrue(os.path.exists(output_file))
 
         with open(output_file) as f:
@@ -120,9 +125,9 @@ class TestPlanRendererApprovalTests(unittest.TestCase):
         input_file = self._create_test_plan_json("testplan.json", test_data)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        stdout, stderr, returncode = self._run_cli(input_file, output_file, "--template", "testplan_detailed.j2")
+        result = self._run_cli_result(input_file, output_file, "--template", "testplan_detailed.j2")
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(result.returncode, 0)
         self.assertTrue(os.path.exists(output_file))
 
         with open(output_file) as f:
@@ -131,6 +136,7 @@ class TestPlanRendererApprovalTests(unittest.TestCase):
 
     def test_render_with_custom_template(self):
         """Test rendering with a custom template."""
+        # approvaltests.approvals.set_default_reporter(ReporterThatAutomaticallyApproves())
         test_data = {"id": 3001, "name": "Custom Template Plan", "product": "CustomProduct", "version": "3.0"}
 
         custom_template = """Plan ID: {{ plan.id }}
@@ -143,13 +149,14 @@ Version: {{ plan.version }}
         template_file = self._create_custom_template("custom.j2", custom_template)
         output_file = os.path.join(self.temp_dir, "output.txt")
 
-        stdout, stderr, returncode = self._run_cli(input_file, output_file, "--template", template_file)
+        result = self._run_cli_result(input_file, output_file, "--template", template_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(0, result.returncode)
 
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
         with open(output_file) as f:
             content = f.read()
-        verify(content)
+        verify(content, namer=NamerFactory.with_parameters("output").namer)
 
     def test_render_yaml_input_with_default_template(self):
         """Test rendering YAML input file."""
@@ -173,9 +180,9 @@ test_runs:
         input_file = self._create_test_plan_yaml("testplan.yaml", yaml_content)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        stdout, stderr, returncode = self._run_cli(input_file, output_file)
+        result = self._run_cli_result(input_file, output_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(0, result.returncode)
 
         with open(output_file) as f:
             content = f.read()
@@ -187,11 +194,7 @@ test_runs:
 
         input_file = self._create_test_plan_json("minimal.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
-
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
-
-        verify(stdout)
+        verify(self._run_cli(input_file))
 
     def test_render_empty_test_runs_list(self):
         """Test rendering with empty test_runs list."""
@@ -209,11 +212,7 @@ test_runs:
 
         input_file = self._create_test_plan_json("empty_runs.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
-
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
-
-        verify(stdout)
+        verify(self._run_cli(input_file))
 
     def test_render_missing_optional_fields(self):
         """Test rendering with missing optional fields."""
@@ -225,11 +224,7 @@ test_runs:
 
         input_file = self._create_test_plan_json("missing_fields.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
-
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
-
-        verify(stdout)
+        verify(self._run_cli(input_file))
 
     def test_render_with_null_values(self):
         """Test rendering with null values in fields."""
@@ -247,11 +242,12 @@ test_runs:
 
         input_file = self._create_test_plan_json("null_values.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
+        result = self._run_cli_result(input_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(0, result.returncode)
 
-        verify(stdout)
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_render_with_unicode_characters(self):
         """Test rendering with unicode and special characters."""
@@ -269,11 +265,12 @@ test_runs:
 
         input_file = self._create_test_plan_json("unicode.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
+        result = self._run_cli_result(input_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(0, result.returncode)
 
-        verify(stdout)
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_render_with_special_html_characters(self):
         """Test rendering with HTML special characters."""
@@ -289,11 +286,12 @@ test_runs:
 
         input_file = self._create_test_plan_json("html_chars.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
+        result = self._run_cli_result(input_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(0, result.returncode)
 
-        verify(stdout)
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_render_with_nested_data_structures(self):
         """Test rendering with deeply nested data."""
@@ -333,13 +331,16 @@ test_runs:
         template_file = self._create_custom_template("nested.j2", custom_template)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        stdout, stderr, returncode = self._run_cli(input_file, output_file, "--template", template_file)
+        result = self._run_cli_result(input_file, output_file, "--template", template_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(0, result.returncode)
+
+        # verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
         with open(output_file) as f:
             content = f.read()
-        verify(content)
+        verify(content, namer=NamerFactory.with_parameters("output").namer)
 
     def test_render_large_test_runs_list(self):
         """Test rendering with many test runs."""
@@ -355,19 +356,16 @@ test_runs:
 
         input_file = self._create_test_plan_json("large.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
-
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
-
-        verify(stdout)
+        verify(self._run_cli(input_file))
 
     def test_error_nonexistent_input_file(self):
         """Test error handling for nonexistent input file."""
-        stdout, stderr, returncode = self._run_cli("/nonexistent/file.json")
+        result = self._run_cli_result("/nonexistent/file.json")
 
-        self.assertNotEqual(returncode, 0)
-        output = stdout + stderr
-        verify(output)
+        self.assertNotEqual(0, result.returncode)
+
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_error_invalid_json_format(self):
         """Test error handling for malformed JSON."""
@@ -375,11 +373,12 @@ test_runs:
         with open(malformed_file, "w") as f:
             f.write("{invalid json content")
 
-        stdout, stderr, returncode = self._run_cli(malformed_file)
+        result = self._run_cli_result(malformed_file)
 
-        self.assertNotEqual(returncode, 0)
-        output = stdout + stderr
-        verify(output)
+        self.assertNotEqual(0, result.returncode)
+
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_error_invalid_yaml_format(self):
         """Test error handling for malformed YAML."""
@@ -387,11 +386,12 @@ test_runs:
         with open(malformed_file, "w") as f:
             f.write("invalid: yaml: [unclosed")
 
-        stdout, stderr, returncode = self._run_cli(malformed_file)
+        result = self._run_cli_result(malformed_file)
 
-        self.assertNotEqual(returncode, 0)
-        output = stdout + stderr
-        verify(output)
+        self.assertNotEqual(0, result.returncode)
+
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_error_unsupported_file_format(self):
         """Test error handling for unsupported file format."""
@@ -399,22 +399,24 @@ test_runs:
         with open(txt_file, "w") as f:
             f.write("plain text content")
 
-        stdout, stderr, returncode = self._run_cli(txt_file)
+        result = self._run_cli_result(txt_file)
 
-        self.assertNotEqual(returncode, 0)
-        output = stdout + stderr
-        verify(output)
+        self.assertNotEqual(0, result.returncode)
+
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_error_nonexistent_template_file(self):
         """Test error handling for nonexistent template file."""
         test_data = {"id": 1, "name": "Test Plan"}
         input_file = self._create_test_plan_json("test.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file, "--template", "/nonexistent/template.j2")
+        result = self._run_cli_result(input_file, "--template", "/nonexistent/template.j2")
 
-        self.assertNotEqual(returncode, 0)
-        output = stdout + stderr
-        verify(output)
+        self.assertNotEqual(0, result.returncode)
+
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_error_invalid_template_syntax(self):
         """Test error handling for template with invalid syntax."""
@@ -424,19 +426,21 @@ test_runs:
         invalid_template = "{{ plan.name"
         template_file = self._create_custom_template("invalid.j2", invalid_template)
 
-        stdout, stderr, returncode = self._run_cli(input_file, "--template", template_file)
+        result = self._run_cli_result(input_file, "--template", template_file)
 
-        self.assertNotEqual(returncode, 0)
-        output = stdout + stderr
-        verify(output)
+        self.assertNotEqual(0, result.returncode)
+
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_error_no_arguments(self):
         """Test error handling when no arguments provided."""
-        stdout, stderr, returncode = self._run_cli()
+        result = self._run_cli_result()
 
-        self.assertNotEqual(returncode, 0)
-        output = stdout + stderr
-        self.assertIn("Usage:", output)
+        self.assertNotEqual(0, result.returncode)
+
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
     def test_render_with_multi_line_text_field(self):
         """Test rendering with multi-line text descriptions."""
@@ -468,11 +472,7 @@ Step 3: Verify results""",
 
         input_file = self._create_test_plan_json("multiline.json", test_data)
 
-        stdout, stderr, returncode = self._run_cli(input_file)
-
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
-
-        verify(stdout)
+        verify(self._run_cli(input_file))
 
     def test_render_real_exported_testplans_with_detailed_template(self):
         """Test rendering real exported_testplans.json with detailed template."""
@@ -481,11 +481,9 @@ Step 3: Verify results""",
 
         output_file = os.path.join(self.temp_dir, "real_detailed.md")
 
-        stdout, stderr, returncode = self._run_cli(
-            "exported_testplans.json", output_file, "--template", "testplan_detailed.j2"
-        )
+        result = self._run_cli_result("exported_testplans.json", output_file, "--template", "testplan_detailed.j2")
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(result.returncode, 0)
 
         with open(output_file) as f:
             content = f.read()
@@ -533,9 +531,9 @@ Total: **{{ plan.test_runs|length if plan.test_runs else 0 }}** test runs
         template_file = self._create_custom_template("markdown.j2", custom_template)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        stdout, stderr, returncode = self._run_cli(input_file, output_file, "--template", template_file)
+        result = self._run_cli_result(input_file, output_file, "--template", template_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(result.returncode, 0)
 
         with open(output_file) as f:
             content = f.read()
@@ -564,15 +562,13 @@ Total: **{{ plan.test_runs|length if plan.test_runs else 0 }}** test runs
                     template_file = self._create_custom_template("list.j2", custom_template)
                     output_file = os.path.join(self.temp_dir, "list_output.md")
 
-                    stdout, stderr, returncode = self._run_cli(
-                        "exported_testplans.json", output_file, "--template", template_file
-                    )
+                    result = self._run_cli_result("exported_testplans.json", output_file, "--template", template_file)
 
-                    if returncode == 0:
-                        with open(output_file) as f:
-                            file_content = f.read()
-                        verify(file_content)
-                    return
+                    assert result.returncode == 0
+
+                    with open(output_file) as f:
+                        file_content = f.read()
+                    verify(file_content, namer=NamerFactory.with_parameters("list_output").namer)
 
         test_data = [
             {"id": 15001, "name": "First Plan", "product": "Product1"},
@@ -591,11 +587,11 @@ Single Plan: {{ plan.name }}
 """
         template_file = self._create_custom_template("list.j2", custom_template)
 
-        stdout, stderr, returncode = self._run_cli(input_file, "--template", template_file)
+        result = self._run_cli_result(input_file, "--template", template_file)
 
-        self.assertEqual(returncode, 0, f"CLI failed with stderr: {stderr}")
+        self.assertEqual(result.returncode, 0)
 
-        verify(stdout)
+        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
 
 
 if __name__ == "__main__":

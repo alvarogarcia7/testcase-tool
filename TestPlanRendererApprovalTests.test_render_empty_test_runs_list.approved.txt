@@ -1,3 +1,5 @@
+Result code: 0
+Standard Output (starting on the new line):
 # Test Plan: Plan Without Runs
 
 **Plan ID:** 6001
@@ -16,3 +18,5 @@ Test plan with no test runs.
 
 No test runs associated with this test plan.
 
+
+Standard Error (starting on the new line):
