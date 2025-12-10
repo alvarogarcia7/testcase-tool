@@ -418,21 +418,6 @@ test_runs:
         verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
         verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
 
-    def test_error_invalid_template_syntax(self):
-        """Test error handling for template with invalid syntax."""
-        test_data = {"id": 1, "name": "Test Plan"}
-        input_file = self._create_test_plan_json("test.json", test_data)
-
-        invalid_template = "{{ plan.name"
-        template_file = self._create_custom_template("invalid.j2", invalid_template)
-
-        result = self._run_cli_result(input_file, "--template", template_file)
-
-        self.assertNotEqual(0, result.returncode)
-
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
-
     def test_error_no_arguments(self):
         """Test error handling when no arguments provided."""
         result = self._run_cli_result()

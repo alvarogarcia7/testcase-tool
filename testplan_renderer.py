@@ -65,7 +65,7 @@ class TestPlanRenderer:
             return True
         except Exception as e:
             print(f"Error rendering template: {e}")
-            return False
+            raise e
 
 
 def main():

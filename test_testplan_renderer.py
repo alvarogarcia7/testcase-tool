@@ -5,6 +5,9 @@ import shutil
 import tempfile
 import unittest
 
+import pytest
+from jinja2 import TemplateSyntaxError
+
 from testplan_renderer import TestPlanRenderer
 
 
@@ -629,9 +632,8 @@ class TestRenderErrorHandling(unittest.TestCase):
 
         renderer = TestPlanRenderer(json_file)
         renderer.load_test_plan()
-        result = renderer.render(template_string=template_string)
-
-        self.assertFalse(result)
+        with pytest.raises(TemplateSyntaxError):
+            renderer.render(template_string=template_string)
 
     def test_render_accessing_nonexistent_field_with_default(self):
         json_content = {"id": 1}
@@ -663,12 +665,11 @@ class TestRenderErrorHandling(unittest.TestCase):
 
         renderer = TestPlanRenderer(json_file)
         renderer.load_test_plan()
-        result = renderer.render(
-            template_string=template_string,
-            output_file="/nonexistent/directory/output.md",
-        )
-
-        self.assertFalse(result)
+        with pytest.raises(FileNotFoundError):
+            renderer.render(
+                template_string=template_string,
+                output_file="/nonexistent/directory/output.md",
+            )
 
 
 class TestRenderWithDefaultTemplate(unittest.TestCase):
