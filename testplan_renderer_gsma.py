@@ -1,10 +1,28 @@
 #!/usr/bin/env python3
+import argparse
 import json
 import sys
 from pathlib import Path
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
+
+from yaml_schema_validator import YamlSchemaValidator
+
+
+class ContainerRenderer:
+    def __init__(self, template_file: Path, input_file: Path):
+        self.template_file = template_file
+        self.input_file = input_file
+        self.container = None
+
+    def _load_template(self):
+        env = Environment(loader=FileSystemLoader(self.template_file.parent))
+        return env.get_template(self.template_file.name)
+
+    def render(self):
+        template = self._load_template()
+        return template.render(container=self.container)
 
 
 class TestPlanRenderer:
@@ -65,49 +83,135 @@ class TestPlanRenderer:
             return True
         except Exception as e:
             print(f"Error rendering template: {e}")
+            raise e
             return False
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python testplan_renderer.py <input_file> [output_file] [--template <template_file>]")
-        print("\nArguments:")
-        print("  input_file    - TestPlan data file (JSON or YAML)")
-        print("  output_file   - Output file (optional, prints to stdout if not provided)")
-        print("  --template    - Custom template file (optional, uses testplan_default.j2 if not provided)")
-        print("\nExamples:")
-        print("  python testplan_renderer.py plan.json")
-        print("  python testplan_renderer.py plan.yaml output.md")
-        print("  python testplan_renderer.py plan.json output.md --template testplan_detailed.j2")
+def parse_args(argv=None):
+    """Require both --container and --test-case modes to be provided. --test-case accepts a schema plus multiple files."""
+    parser = argparse.ArgumentParser(
+        prog="testplan_renderer_gsma.py",
+        description="Create a document with all the test cases from a test plan.",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output",
+        dest="output_file",
+        required=False,
+        help="Output file for container rendering (if not provided prints container render to stdout)",
+    )
+
+    parser.add_argument(
+        "--container",
+        nargs=3,
+        required=True,
+        metavar=("CONTAINER_SCHEMA", "CONTAINER_TEMPLATE", "CONTAINER_FILE"),
+        help="Provide container schema, template, and a container file to render (three args):"
+        " --container container_schema.json container.j2 container.json",
+    )
+
+    # test-case: schema + one or more files; we'll validate minimum count in main
+    parser.add_argument(
+        "--test-case",
+        required=True,
+        nargs="+",
+        metavar=("TEST_CASE_SCHEMA", "TEST_CASE_TEMPLATE TEST_CASE_FILE [REST_TEST_CASE_FILES]"),
+        help=(
+            "Provide first the testcase schema, template, and then one or more testcase files: "
+            "--test-case testcase_schema.json testcase.j2 test1.yml test2.yml ..."
+        ),
+    )
+
+    return parser.parse_args(argv)
+
+
+def usage(return_code):
+    print(
+        "Usage: python testplan_renderer_gsma.py [-o out] --container container_schema.json container.json --test-case testcase_schema.json test1.yml test2.yml ..."
+    )
+    sys.exit(return_code)
+
+
+def main(argv=None):
+    args = parse_args(argv)
+
+    print("----- Command line arguments -----")
+    for arg in vars(args):
+        print(f"{arg}: {getattr(args, arg)}")
+
+    for file in args.container:
+        assert Path(file).exists(), f"Container file not found: {file}"
+
+    if not args.output_file:
+        print("No output file provided, printing to stdout")
+        args.output_file = None
+
+    container_schema_file = args.container[0]
+    container_template_file = args.container[1]
+    container_data_file = args.container[2]
+
+    assert container_template_file.endswith(
+        ".j2"
+    ), f"Container template must be a Jinja2 template: {container_template_file}. Must end with '.j2'."
+    template_file = Path(container_template_file)
+    assert template_file.exists(), f"Container template file not found: {container_template_file}"
+
+    assert container_data_file.endswith(
+        (".json", ".yaml", ".yml")
+    ), f"Container data file must be JSON or YAML: {container_data_file}"
+    assert Path(container_data_file).exists(), f"Container data file not found: {container_data_file}"
+
+    if not (args.container and args.test_case):
+        print("Error: you must provide BOTH --container and --test-case arguments")
+        usage(1)
+
+    # Validate that --test-case includes schema + at least two testcase files
+    # (assumption: user requested at least 2 test-case files)
+    if len(args.test_case) < 3:
+        print("Error: --test-case requires a schema, a template, plus at least ONE testcase files")
+        usage(1)
+
+    for fpath in args.test_case:
+        assert Path(fpath).exists(), f"File not found: {fpath}"
+
+    if not YamlSchemaValidator(
+        container_data_file, YamlSchemaValidator.load_json_schema(container_schema_file)[1]
+    ).validate_and_report():
+        print("Error validating container data file")
         sys.exit(1)
 
-    input_file = sys.argv[1]
-    output_file = None
-    template_file = None
-
-    i = 2
-    while i < len(sys.argv):
-        if sys.argv[i] == "--template" and i + 1 < len(sys.argv):
-            template_file = sys.argv[i + 1]
-            i += 2
-        else:
-            output_file = sys.argv[i]
-            i += 1
-
-    if not template_file:
-        script_dir = Path(__file__).parent
-        default_template = script_dir / "testplan_default.j2"
-        if default_template.exists():
-            template_file = str(default_template)
-        else:
-            print("Error: Default template 'testplan_default.j2' not found")
+    test_case_schema = args.test_case[0]
+    test_case_files = args.test_case[1:]
+    for test_case_file in test_case_files:
+        if not YamlSchemaValidator(
+            test_case_file, YamlSchemaValidator.load_json_schema(test_case_schema)[1]
+        ).validate_and_report():
+            print(f"Error validating test case file: {test_case_file}")
             sys.exit(1)
 
-    renderer = TestPlanRenderer(input_file)
-    if not renderer.load_test_plan():
+    container_renderer = TestPlanRenderer(container_data_file)
+    if not container_renderer.load_test_plan():
+        sys.exit(1)
+    if not container_renderer.render(template_path=template_file, output_file=args.output_file):
+        print("Error rendering container")
         sys.exit(1)
 
-    if not renderer.render(template_path=template_file, output_file=output_file):
+    errors = []
+    for fpath in test_case_files:
+        renderer = TestPlanRenderer(fpath)
+        if not renderer.load_test_plan():
+            print(f"Skipping file due to load error: {fpath}")
+            errors.append(fpath)
+            continue
+        print(f"----- Rendering test case file: {fpath} -----")
+        if not renderer.render(template_path=template_file, output_file=args.output_file):
+            print(f"Error rendering {fpath}")
+
+    if errors:
+        print(f"Errors rendering {len(errors)} files:")
+        for e in errors:
+            print(f"-  {e}")
         sys.exit(1)
 
 
