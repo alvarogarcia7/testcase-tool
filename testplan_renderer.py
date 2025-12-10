@@ -20,15 +20,15 @@ class TestPlanRenderer:
                 elif self.input_file.endswith((".yaml", ".yml")):
                     self.test_plan = yaml.safe_load(f)
                 else:
-                    print(f"Error: Unsupported file format '{self.input_file}'")
+                    print("Error: Unsupported file format")
                     return False
             return True
         except FileNotFoundError:
             print(f"Error: File '{self.input_file}' not found")
-        except (json.JSONDecodeError, yaml.YAMLError) as e:
-            print(f"Error parsing file: {e}")
-        except Exception as e:
-            print(f"Error loading file: {e}")
+        except (json.JSONDecodeError, yaml.YAMLError):
+            print("Error parsing file")
+        except Exception:
+            print("Error loading file")
         return False
 
     def render(self, template_path=None, template_string=None, output_file=None):

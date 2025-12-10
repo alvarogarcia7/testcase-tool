@@ -1,0 +1,23 @@
+# Test Plan: Sample Test Plan
+
+**Plan ID:** 1001
+**Type:** Functional
+**Product:** MyApp
+**Version:** 1.0
+**Author:** John Doe
+**Created:** 2024-01-15
+
+## Description
+
+This is a sample test plan for approval testing.
+
+## Test Runs
+
+
+Total test runs: 2
+
+
+- **Run 101**: Test Run 1
+
+- **Run 102**: Test Run 2
+

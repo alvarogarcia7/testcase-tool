@@ -1,0 +1,11 @@
+# Nested Data Plan
+
+
+## Complex Run
+
+- Priority: 1
+- Tags: critical, regression, p0
+- OS: Linux
+- Browser: Chrome v120
+- Config: timeout=3600, retries=3
+
