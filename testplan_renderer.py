@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from jinja2 import Environment, FileSystemLoader, Template
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
 
 
 class TestPlanRenderer:
@@ -42,7 +42,10 @@ class TestPlanRenderer:
                 if not template_file.exists():
                     print(f"Error: Template file '{template_path}' not found")
                     return False
-                env = Environment(loader=FileSystemLoader(template_file.parent))
+                env = Environment(
+                    loader=FileSystemLoader(template_file.parent),
+                    undefined=StrictUndefined,
+                )
                 template = env.get_template(template_file.name)
             elif template_string:
                 template = Template(template_string)

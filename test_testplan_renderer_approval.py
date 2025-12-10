@@ -476,9 +476,6 @@ Step 3: Verify results""",
 
     def test_render_real_exported_testplans_with_detailed_template(self):
         """Test rendering real exported_testplans.json with detailed template."""
-        if not os.path.exists("exported_testplans.json"):
-            self.skipTest("exported_testplans.json not found")
-
         output_file = os.path.join(self.temp_dir, "real_detailed.md")
 
         result = self._run_cli_result("exported_testplans.json", output_file, "--template", "testplan_detailed.j2")

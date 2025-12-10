@@ -21,7 +21,7 @@
 
 ## Test Runs
 
-{% if plan.test_runs %}
+{% if "test_runs" in plan and plan.test_runs %}
 Total test runs: {{ plan.test_runs|length }}
 
 {% for run in plan.test_runs %}
@@ -64,4 +64,4 @@ No test runs associated with this test plan.
 - **Version:** {{ plan.version|default('N/A') }}
 - **Author:** {{ plan.author|default('N/A') }}
 - **Created:** {{ plan.create_date|default('N/A') }}
-- **Total Test Runs:** {{ plan.test_runs|length if plan.test_runs else 0 }}
+- **Total Test Runs:** {{ plan.test_runs|length if "test_runs" in plan and plan.test_runs else 0 }}
