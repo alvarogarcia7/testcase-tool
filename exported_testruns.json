@@ -1,0 +1,42 @@
+[
+  {
+    "id": 12315,
+    "start_date": "20251002T06:55:36",
+    "stop_date": "None",
+    "planned_start": null,
+    "planned_stop": null,
+    "summary": "Test run for tepl1",
+    "notes": "",
+    "plan": 13697,
+    "plan__name": "tepl1",
+    "build": 22965,
+    "build__name": "unspecified",
+    "build__version": 20413,
+    "build__version__value": "unspecified",
+    "build__version__product": 13534,
+    "manager": 5,
+    "manager__username": "test",
+    "default_tester": 5,
+    "default_tester__username": "test"
+  },
+  {
+    "id": 12316,
+    "start_date": "20251002T07:02:47",
+    "stop_date": "20251002T07:03:09",
+    "planned_start": null,
+    "planned_stop": null,
+    "summary": "Test run for tepl1",
+    "notes": "",
+    "plan": 13697,
+    "plan__name": "tepl1",
+    "build": 22965,
+    "build__name": "unspecified",
+    "build__version": 20413,
+    "build__version__value": "unspecified",
+    "build__version__product": 13534,
+    "manager": 5,
+    "manager__username": "test",
+    "default_tester": 5,
+    "default_tester__username": "test"
+  }
+]

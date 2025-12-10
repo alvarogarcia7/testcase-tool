@@ -1,0 +1,20 @@
+[
+  {
+    "id": 13697,
+    "name": "tepl1",
+    "text": "",
+    "create_date": "20251002T06:41:51",
+    "is_active": true,
+    "extra_link": null,
+    "product_version": 20413,
+    "product_version__value": "unspecified",
+    "product": 13534,
+    "product__name": "mywebapp",
+    "author": 5,
+    "author__username": "test",
+    "type": 65,
+    "type__name": "Aceptaci\u00f3n",
+    "parent": null,
+    "children__count": 0
+  }
+]
