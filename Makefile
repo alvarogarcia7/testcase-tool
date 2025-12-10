@@ -18,6 +18,7 @@ verify-virtualenv:
 test: verify-virtualenv
 	uv run python3 -m unittest discover -p "test_*.py" -v
 	uv run python testcase_validator.py data/dataset_4_GSMA/json_schema.json data/dataset_4_GSMA/gsma_4.4.2.2_TC.yml
+	uv run python testplan_renderer_gsma.py --container data/dataset_4_GSMA/json_schema.json template_gsma.j2 data/dataset_4_GSMA/gsma_4.4.2.2_TC.yml --test-case data/dataset_4_GSMA/json_schema.json data/dataset_4_GSMA/gsma_4.4.2.2_TC.yml data/dataset_4_GSMA/gsma_4.4.2.2_TC.yml
 .PHONY: test
 
 lint: verify-virtualenv
