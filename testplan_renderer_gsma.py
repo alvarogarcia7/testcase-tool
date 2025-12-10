@@ -1,47 +1,35 @@
 #!/usr/bin/env python3
+import abc
 import argparse
 import json
 import os
 import sys
+from abc import ABC
 from functools import partial
 from pathlib import Path
 from typing import Callable, Optional
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
+from typing_extensions import override
 
 from yaml_schema_validator import YamlSchemaValidator
 
 
-class ContainerRenderer:
-    def __init__(self, template_file: Path, input_file: Path):
-        self.template_file = template_file
-        self.input_file = input_file
-        self.container = None
-
-    def _load_template(self):
-        env = Environment(loader=FileSystemLoader(self.template_file.parent))
-        return env.get_template(self.template_file.name)
-
-    def render(self):
-        template = self._load_template()
-        return template.render(container=self.container)
-
-
-class TestPlanRenderer:
+class GenericTestPlanRenderer(ABC):
     def __init__(self, input_file):
         self.input_file = input_file
-        self.test_plan = None
+        self.payload = None
 
-    def load_test_plan(self):
+    def load_payload(self):
         file_path = self.input_file
         file_path_name = self.input_file.__str__()
         try:
             with open(file_path) as f:
                 if file_path_name.endswith(".json"):
-                    self.test_plan = json.load(f)
+                    self.payload = json.load(f)
                 elif file_path_name.endswith((".yaml", ".yml")):
-                    self.test_plan = yaml.safe_load(f)
+                    self.payload = yaml.safe_load(f)
                 else:
                     print(f"Error: Unsupported file format '{file_path_name}'")
                     return False
@@ -73,7 +61,7 @@ class TestPlanRenderer:
         return partial(func, *args, **kwargs)
 
     def render(self, template_path=None, template_string=None, output_file=None):
-        if not self.test_plan:
+        if not self.payload:
             print("Error: No test plan loaded")
             return False
 
@@ -88,7 +76,7 @@ class TestPlanRenderer:
                     undefined=StrictUndefined,
                 )
                 # Expose helper to templates
-                env.globals["read_file"] = self._make_partial(TestPlanRenderer.read_file_safe, template_file.parent)
+                env.globals["read_file"] = self._make_partial(TestCaseRenderer.read_file_safe, template_file.parent)
                 template = env.get_template(template_file.name)
             elif template_string:
                 template = Template(template_string)
@@ -96,7 +84,7 @@ class TestPlanRenderer:
                 print("Error: No template provided")
                 return False
 
-            rendered = template.render(tc=self.test_plan, toc_entry="4.2.2.2")
+            rendered = self._actual_render(template)
 
             if output_file:
                 with open(output_file, "w") as f:
@@ -109,6 +97,22 @@ class TestPlanRenderer:
         except Exception as e:
             print(f"Error rendering template: {e}")
             raise e
+
+    @abc.abstractmethod
+    def _actual_render(self, template):
+        pass
+
+
+class TestCaseRenderer(GenericTestPlanRenderer):
+    @override
+    def _actual_render(self, template: Template) -> str:
+        return template.render(tc=self.payload, toc_entry="4.2.2.2")
+
+
+class ContainerRenderer(GenericTestPlanRenderer):
+    @override
+    def _actual_render(self, template: Template) -> str:
+        return template.render(container=self.payload)
 
 
 def parse_args(argv=None):
@@ -168,8 +172,8 @@ def main(argv=None):
 
     errors = []
     for fpath in test_case_files:
-        renderer = TestPlanRenderer(fpath)
-        if not renderer.load_test_plan():
+        renderer = TestCaseRenderer(fpath)
+        if not renderer.load_payload():
             print(f"Skipping file due to load error: {fpath}")
             errors.append(fpath)
             continue
@@ -185,8 +189,8 @@ def main(argv=None):
             print(f"-  {e}")
         sys.exit(1)
 
-    container_renderer = TestPlanRenderer(container_data_file)
-    if not container_renderer.load_test_plan():
+    container_renderer = ContainerRenderer(container_data_file)
+    if not container_renderer.load_payload():
         sys.exit(1)
     if not container_renderer.render(template_path=container_template_file, output_file=output_file):
         print("Error rendering container")
