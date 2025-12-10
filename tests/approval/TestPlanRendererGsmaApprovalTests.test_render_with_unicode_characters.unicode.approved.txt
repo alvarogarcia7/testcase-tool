@@ -1,0 +1,36 @@
+Return Code: 0
+
+Output File:
+# Test Document
+
+Product: 测试产品 🚀
+Date: 2024-01-01
+
+# 4.2.2.2 Test Case: 测试-1.1.1
+
+**Requirement**: РЕК001
+**Item**: 1
+
+# Description
+
+Test with unicode: 中文字符 and émojis 🎉# General Initial Conditions
+
+| **Entity** | **Description of the general initial condition** |
+| ------------- | --------- |
+| eUICC | 条件一 |
+| eUICC | 条件二 |
+
+# Test Sequence 1 Тест последовательность
+
+Описание с unicode symbols: @#$%
+
+| **Step Number** | **Action** | **Expected Result** | **Expected Output** |
+| ------------- | --------- | --------- |
+| 1 | 步骤描述 | 成功 | Success ✓ |
+
+
+
+---
+Тестовое описание with émojis 😊
+
+Stderr:

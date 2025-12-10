@@ -1,0 +1,51 @@
+Return Code: 0
+
+Output File:
+# Test Document
+
+Product: Test Product
+Date: 2024-01-01
+
+# 4.2.2.2 Test Case: 7.7.7
+
+**Requirement**: REQ_MULTILINE
+**Item**: 7
+
+# Description
+
+This test case has a multi-line description.
+
+It spans multiple lines and includes:
+- Important point 1
+- Important point 2
+
+And additional details.
+# Test Sequence 1 Multiline Sequence
+
+Step-by-step sequence:
+
+1. First step
+2. Second step
+3. Third step
+
+Each step is important.
+
+| **Step Number** | **Action** | **Expected Result** | **Expected Output** |
+| ------------- | --------- | --------- |
+| 1 | Single line step | OK | Success
+With newline |
+
+
+
+---
+This is a multi-line description.
+
+It contains multiple paragraphs.
+
+- Bullet point 1
+- Bullet point 2
+- Bullet point 3
+
+And some final text.
+
+Stderr:

@@ -1,0 +1,52 @@
+Return Code: 0
+
+Output File:
+# Test Document
+
+Product: Complex Product
+Date: 2024-01-01
+
+# 4.2.2.2 Test Case: 10.10.10
+
+**Requirement**: REQ_COMPLEX
+**Item**: 10
+
+# Description
+
+Complex nested test case with multiple levels# General Initial Conditions
+
+| **Entity** | **Description of the general initial condition** |
+| ------------- | --------- |
+| Device | Registered |
+| Device | Active |
+| SM-DP+ | Server ready |
+| SM-DP+ | Auth configured |
+| eUICC | Condition A |
+| eUICC | Condition B |
+| eUICC | Condition C |
+
+# Test Sequence 1 First Sequence
+
+Multi-step sequence with various conditions
+
+| **Step Number** | **Action** | **Expected Result** | **Expected Output** |
+| ------------- | --------- | --------- |
+| 1 | Initialize connection | CONNECTED | Connection established |
+| 2 | Authenticate device | AUTH_SUCCESS | Device authenticated |
+| 3 | Download profile | DOWNLOAD_OK | Profile downloaded |
+
+
+# Test Sequence 2 Second Sequence
+
+Verification sequence
+
+| **Step Number** | **Action** | **Expected Result** | **Expected Output** |
+| ------------- | --------- | --------- |
+| 1 | Verify profile installation | VERIFIED | Profile installed correctly |
+
+
+
+---
+Complex test
+
+Stderr:
