@@ -1,0 +1,67 @@
+# Test Plan: {{ plan.name|default('Untitled') }}
+
+================================================================================
+
+## Plan Information
+
+| Field | Value |
+|-------|-------|
+| **Plan ID** | {{ plan.id|default('N/A') }} |
+| **Type** | {{ plan.type|default('N/A') }} |
+| **Product** | {{ plan.product|default('N/A') }} |
+| **Version** | {{ plan.version|default('N/A') }} |
+| **Author** | {{ plan.author|default('N/A') }} |
+| **Created** | {{ plan.create_date|default('N/A') }} |
+
+## Description
+
+{{ plan.text|default(plan.description)|default('No description provided') }}
+
+================================================================================
+
+## Test Runs
+
+{% if plan.test_runs %}
+Total test runs: {{ plan.test_runs|length }}
+
+{% for run in plan.test_runs %}
+### Run {{ loop.index }}: {{ run.summary|default('Untitled Run') }}
+
+| Field | Value |
+|-------|-------|
+| **Run ID** | {{ run.id|default('N/A') }} |
+| **Summary** | {{ run.summary|default('N/A') }} |
+| **Plan** | {{ run.plan|default('N/A') }} |
+| **Build** | {{ run.build|default('N/A') }} |
+| **Manager** | {{ run.manager|default('N/A') }} |
+| **Default Tester** | {{ run.default_tester|default('N/A') }} |
+| **Start Date** | {{ run.start_date|default('N/A') }} |
+| **Stop Date** | {{ run.stop_date|default('N/A') }} |
+| **Planned Start** | {{ run.planned_start|default('N/A') }} |
+| **Planned Stop** | {{ run.planned_stop|default('N/A') }} |
+
+{% if run.notes %}
+**Notes:**
+
+{{ run.notes }}
+{% endif %}
+
+---
+
+{% endfor %}
+{% else %}
+No test runs associated with this test plan.
+{% endif %}
+
+================================================================================
+
+## Summary
+
+- **Plan Name:** {{ plan.name|default('N/A') }}
+- **Plan ID:** {{ plan.id|default('N/A') }}
+- **Type:** {{ plan.type|default('N/A') }}
+- **Product:** {{ plan.product|default('N/A') }}
+- **Version:** {{ plan.version|default('N/A') }}
+- **Author:** {{ plan.author|default('N/A') }}
+- **Created:** {{ plan.create_date|default('N/A') }}
+- **Total Test Runs:** {{ plan.test_runs|length if plan.test_runs else 0 }}

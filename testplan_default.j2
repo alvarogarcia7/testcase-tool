@@ -1,0 +1,24 @@
+# Test Plan: {{ plan.name|default('Untitled') }}
+
+**Plan ID:** {{ plan.id|default('N/A') }}
+**Type:** {{ plan.type|default('N/A') }}
+**Product:** {{ plan.product|default('N/A') }}
+**Version:** {{ plan.version|default('N/A') }}
+**Author:** {{ plan.author|default('N/A') }}
+**Created:** {{ plan.create_date|default('N/A') }}
+
+## Description
+
+{{ plan.text|default(plan.description)|default('No description provided') }}
+
+## Test Runs
+
+{% if plan.test_runs %}
+Total test runs: {{ plan.test_runs|length }}
+
+{% for run in plan.test_runs %}
+- **Run {{ run.id|default('N/A') }}**: {{ run.summary|default('No summary') }}
+{% endfor %}
+{% else %}
+No test runs associated with this test plan.
+{% endif %}
