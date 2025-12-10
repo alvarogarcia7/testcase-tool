@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 import approvaltests.approvals
 from approvaltests import verify
@@ -36,6 +37,8 @@ Standard Error (starting on the new line):
 
     def _run_cli_result(self, *args):
         """Run testplan_renderer.py CLI and return stdout, stderr, and return code."""
+        assert Path(sys.executable).exists(), "Python interpreter not found."
+        assert Path("testplan_renderer.py").exists(), "testplan_renderer.py not found."
         cmd = [sys.executable, "testplan_renderer.py"] + list(args)
         result = subprocess.run(cmd, capture_output=True, text=True)
         return result
@@ -63,7 +66,7 @@ Standard Error (starting on the new line):
 
     def test_render_with_default_template_and_real_data(self):
         """Test rendering exported_testplans.json with default template."""
-        verify(self._run_cli("exported_testplans.json"))
+        verify(self._run_cli("tests/approval/exported_testplans.json"))
 
     def test_render_with_default_template_to_file(self):
         """Test rendering to output file with default template."""
@@ -125,7 +128,9 @@ Standard Error (starting on the new line):
         input_file = self._create_test_plan_json("testplan.json", test_data)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        result = self._run_cli_result(input_file, output_file, "--template", "testplan_detailed.j2")
+        result = self._run_cli_result(
+            input_file, output_file, "--template", Path(".") / "tests" / "approval" / "testplan_detailed.j2"
+        )
 
         self.assertEqual(result.returncode, 0)
         self.assertTrue(os.path.exists(output_file))
@@ -182,7 +187,7 @@ test_runs:
 
         result = self._run_cli_result(input_file, output_file)
 
-        self.assertEqual(0, result.returncode)
+        self.assertEqual(0, result.returncode, f"Failed with stderr:{result.stderr}")
 
         with open(output_file) as f:
             content = f.read()
@@ -463,7 +468,9 @@ Step 3: Verify results""",
         """Test rendering real exported_testplans.json with detailed template."""
         output_file = os.path.join(self.temp_dir, "real_detailed.md")
 
-        result = self._run_cli_result("exported_testplans.json", output_file, "--template", "testplan_detailed.j2")
+        result = self._run_cli_result(
+            "tests/approval/exported_testplans.json", output_file, "--template", "tests/approval/testplan_detailed.j2"
+        )
 
         self.assertEqual(result.returncode, 0)
 
@@ -523,11 +530,12 @@ Total: **{{ plan.test_runs|length if plan.test_runs else 0 }}** test runs
 
     def test_render_with_json_list_input(self):
         """Test rendering when input is a JSON list (array of test plans)."""
-        if not os.path.exists("exported_testplans.json"):
-            with open("exported_testplans.json") as f:
-                content = f.read()
-                if content.strip().startswith("["):
-                    custom_template = """{% if plan is iterable and plan is not mapping %}
+        json_path = Path(".") / "tests" / "approval" / "exported_testplans.json"
+        assert json_path.exists(), f"Test data file not found: {json_path!s}"
+        with json_path.open() as f:
+            content = f.read()
+            if content.strip().startswith("["):
+                custom_template = """{% if plan is iterable and plan is not mapping %}
 {% for p in plan %}
 # Test Plan: {{ p.name|default('Untitled') }}
 - ID: {{ p.id|default('N/A') }}
@@ -541,16 +549,16 @@ Total: **{{ plan.test_runs|length if plan.test_runs else 0 }}** test runs
 - ID: {{ plan.id|default('N/A') }}
 {% endif %}
 """
-                    template_file = self._create_custom_template("list.j2", custom_template)
-                    output_file = os.path.join(self.temp_dir, "list_output.md")
+                template_file = self._create_custom_template("list.j2", custom_template)
+                output_file = os.path.join(self.temp_dir, "list_output.md")
 
-                    result = self._run_cli_result("exported_testplans.json", output_file, "--template", template_file)
+                result = self._run_cli_result(json_path, output_file, "--template", template_file)
 
-                    assert result.returncode == 0
+                assert result.returncode == 0
 
-                    with open(output_file) as f:
-                        file_content = f.read()
-                    verify(file_content, namer=NamerFactory.with_parameters("list_output").namer)
+                with open(output_file) as f:
+                    file_content = f.read()
+                verify(file_content, namer=NamerFactory.with_parameters("list_output").namer)
 
         test_data = [
             {"id": 15001, "name": "First Plan", "product": "Product1"},

@@ -96,7 +96,7 @@ def main():
 
     if not template_file:
         script_dir = Path(__file__).parent
-        default_template = script_dir / "testplan_default.j2"
+        default_template = script_dir / "tests" / "approval" / "testplan_default.j2"
         if default_template.exists():
             template_file = str(default_template)
         else:
