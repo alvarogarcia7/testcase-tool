@@ -58,7 +58,6 @@ class TestPlanRenderer:
             if output_file:
                 with open(output_file, "w") as f:
                     f.write(rendered)
-                print(f"Rendered output saved to: {output_file}")
             else:
                 print(rendered)
 

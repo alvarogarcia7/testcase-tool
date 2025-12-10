@@ -1,0 +1,21 @@
+Return Code: 0
+
+Output File:
+# Test Document
+
+Product: Test Product
+Date: 2024-01-01
+
+# 4.2.2.2 Test Case: 2.2.2
+
+**Requirement**: REQ002
+**Item**: 2
+
+# Description
+
+Test case with empty sequences
+
+---
+Test Description
+
+Stderr:

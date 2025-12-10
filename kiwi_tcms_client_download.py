@@ -1,6 +1,5 @@
+import json
 import os
-import xml.etree.ElementTree as ET
-from xmlrpc.client import DateTime, _iso8601_format
 
 from tcms_api import TCMS
 
@@ -34,10 +33,8 @@ def convert_if_present(obj, key):
 # # ✅ 2. Download ALL Test Cases
 # all_cases = tcms.TestCase.filter()
 # print(f"Downloaded {len(all_cases)} cases")
-import json
 
 if FEATURE_1_DOWNLOAD_TEST_CASES:
-
     # all_cases is a list of dictionaries holding the full TCMS metadata.
     #
     # ✅ 3. Download Test Cases for a Specific Product

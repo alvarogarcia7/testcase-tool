@@ -48,10 +48,10 @@ class GenericTestPlanRenderer(ABC):
         assert isinstance(template_dir, Path), f"Expected Path, got {type(template_dir)}, {template_dir}"
         assert isinstance(name, str), f"Expected str, got {type(name)}: {name}"
         path = (template_dir / name).resolve()
+        template_dir = template_dir.resolve()
         # Prevent escaping the template dir: ensure path is inside template_dir
         if template_dir not in path.parents and path != template_dir:
-            print(f"Error: Path '{path}' is outside of template directory '{template_dir}'")
-            raise RuntimeError("Access denied")
+            raise RuntimeError(f"Access denied: Error: Path '{path}' is outside of template directory '{template_dir}'")
         return path.read_text()
 
     # Creating a typed wrapper factory
@@ -89,7 +89,6 @@ class GenericTestPlanRenderer(ABC):
             if output_file:
                 with open(output_file, "w") as f:
                     f.write(rendered)
-                print(f"Rendered output saved to: {output_file}")
             else:
                 print(rendered)
 

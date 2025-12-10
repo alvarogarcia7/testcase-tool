@@ -1,0 +1,30 @@
+Return Code: 0
+
+Output File:
+# Test Document
+
+Product: Product with <tags> & "quotes"
+Date: 2024-01-01
+
+# 4.2.2.2 Test Case: 6.6.6 <Test>
+
+**Requirement**: REQ<001>
+**Item**: 6
+
+# Description
+
+Test with special chars: < > & " ' and @#$%
+# Test Sequence 1 Sequence with <brackets>
+
+Description with & ampersands and "quotes"
+
+| **Step Number** | **Action** | **Expected Result** | **Expected Output** |
+| ------------- | --------- | --------- |
+| 1 | Step with <html> tags & symbols | Result with <> and & | Output with "double" and 'single' quotes |
+
+
+
+---
+Description with 'apostrophes' and <html> tags
+
+Stderr:

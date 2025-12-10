@@ -16,3 +16,9 @@ data_working/
 .yaml-templates/
 
 data/dataset_4_GSMA/container/test_plan.md
+
+# ApprovalTests - ignore received files
+*.received.txt
+
+# Exported data files
+exported_*.json
