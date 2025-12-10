@@ -12,3 +12,8 @@ tmp/
 
 # Working data
 data_working/
+
+.yaml-templates/
+template_big_gsma.j2
+template_gsma.j2
+testplan_renderer_gsma.py
