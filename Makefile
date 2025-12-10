@@ -22,3 +22,7 @@ test: verify-virtualenv
 lint: verify-virtualenv
 	@SKIP=unit-test uv run pre-commit run --all-files
 .PHONY: lint
+
+pytest-junit: verify-virtualenv
+	@uv run pytest --junitxml=data_working/results.xml > /dev/null
+.PHONY: pytest-junit

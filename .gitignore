@@ -9,3 +9,6 @@ tmp/
 
 # Python virtual environment
 .venv/
+
+# Working data
+data_working/
