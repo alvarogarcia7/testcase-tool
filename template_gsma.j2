@@ -1,0 +1,28 @@
+## {{ toc_entry }} Test Case: {{ tc.id }}
+
+**Requirement**: {{ tc.requirement }}
+**Item**: {{ tc.item }}
+
+## Description
+
+{{ tc.description }}
+
+## General Initial Conditions
+
+| **Entity** | **Description of the general initial condition** |
+| ------------- | --------- |
+{% for entity,condition in tc.initial_conditions.items() -%}
+| {{ entity }} | {{ condition }} |
+{%- endfor %}
+
+{% for ts in tc.test_sequences %}
+## Test Sequence {{ ts.id }} {{ ts.name }}
+
+{{ ts.description }}
+
+| **Step Number** | **Action** | **Expected Result** | **Expected Output** |
+| ------------- | --------- | --------- |
+{% for step in ts.steps -%}
+| {{ step.step }} | {{ step.description }} | {{ step.expected.result }} | {{ step.expected.output }} |
+{% endfor %}
+{% endfor %}
