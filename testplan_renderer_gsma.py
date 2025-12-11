@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import abc
 import argparse
+import dataclasses
 import json
 import os
 import sys
@@ -114,7 +115,7 @@ class ContainerRenderer(GenericTestPlanRenderer):
         return template.render(container=self.payload)
 
 
-def parse_args(argv=None):
+def parse_args(argv):
     """Require both --container and --test-case modes to be provided. --test-case accepts a schema plus multiple files."""
     parser = argparse.ArgumentParser(
         prog="testplan_renderer_gsma.py",
@@ -161,26 +162,22 @@ def usage(return_code):
 
 
 def main(argv=None):
-    (
-        output_file,
-        container_template_file,
-        container_data_file,
-        test_case_template_file,
-        test_case_files,
-    ) = parse_and_validate_args(argv)
+    parsed_args = parse_and_validate_args(argv)
 
     errors = []
-    for fpath in test_case_files:
+    for fpath in [tcr.data_file for tcr in parsed_args.test_case_renderers]:
         renderer = TestCaseRenderer(fpath)
         if not renderer.load_payload():
             print(f"Skipping file due to load error: {fpath}")
             errors.append(fpath)
             continue
         print(f"----- Rendering test case file: {fpath} -----")
-        test_plan_md = (container_template_file.parent / "test_plan.md").resolve()
+        test_plan_md = (parsed_args.container_renderer.template_file.parent / "test_plan.md").resolve()
         os.unlink(test_plan_md)
         assert not Path(test_plan_md).exists(), f"Test plan markdown still exists before creating it: {test_plan_md}"
-        if not renderer.render(template_path=test_case_template_file, output_file=test_plan_md):
+        if not renderer.render(
+            template_path=parsed_args.test_case_renderers[0].template_file, output_file=test_plan_md
+        ):
             print(f"Error rendering {fpath}")
     if errors:
         print(f"Errors rendering {len(errors)} files:")
@@ -188,15 +185,55 @@ def main(argv=None):
             print(f"-  {e}")
         sys.exit(1)
 
-    container_renderer = ContainerRenderer(container_data_file)
+    container_renderer = ContainerRenderer(parsed_args.container_renderer.data_file)
     if not container_renderer.load_payload():
         sys.exit(1)
-    if not container_renderer.render(template_path=container_template_file, output_file=output_file):
+    if not container_renderer.render(
+        template_path=parsed_args.container_renderer.template_file, output_file=parsed_args.output_file
+    ):
         print("Error rendering container")
         sys.exit(1)
 
 
-def parse_and_validate_args(argv) -> tuple[Optional[Path], Path, Path, Path, list[Path]]:
+@dataclasses.dataclass(frozen=True)
+class RendererArgs:
+    template_file: Path
+    schema_file: Path
+    data_file: Path
+
+    def validate(self):
+        errors = []
+        if not self.data_file.exists():
+            errors.append(f"Data file not found: {self.data_file}")
+        if not self.template_file.exists():
+            errors.append(f"Template file not found: {self.template_file}")
+        if not self.schema_file.exists():
+            errors.append(f"Schema file not found: {self.schema_file}")
+        schema = YamlSchemaValidator.load_json_schema(self.schema_file)
+        if not (schema[0] and schema[1]):
+            errors.append(f"Invalid schema file: {self.schema_file}")
+
+        if not YamlSchemaValidator(self.data_file, schema[1]).validate_and_report():
+            print(f"Error validating test case file: {self.data_file}")
+            sys.exit(1)
+
+        if not self.data_file.__str__().endswith((".json", ".yaml", ".yml")):
+            errors.append(f"Data file must be JSON or YAML: {self.data_file}")
+
+        if not self.template_file.__str__().endswith(".j2"):
+            errors.append(f"Container template must be a Jinja2 template: {self.template_file!s}. Must end with '.j2'.")
+
+        return errors
+
+
+@dataclasses.dataclass(frozen=True)
+class TestPlanRendererArgsOutput:
+    output_file: Optional[Path]
+    container_renderer: RendererArgs
+    test_case_renderers: list[RendererArgs]
+
+
+def parse_and_validate_args(argv) -> TestPlanRendererArgsOutput:
     from collections import Counter
     from typing import Iterable, List
 
@@ -226,16 +263,15 @@ def parse_and_validate_args(argv) -> tuple[Optional[Path], Path, Path, Path, lis
     container_template_file = args.container[1]
     container_data_file = args.container[2]
 
-    assert container_template_file.endswith(
-        ".j2"
-    ), f"Container template must be a Jinja2 template: {container_template_file}. Must end with '.j2'."
-    template_file = Path(container_template_file)
-    assert template_file.exists(), f"Container template file not found: {container_template_file}"
-
-    assert container_data_file.endswith(
-        (".json", ".yaml", ".yml")
-    ), f"Container data file must be JSON or YAML: {container_data_file}"
-    assert Path(container_data_file).exists(), f"Container data file not found: {container_data_file}"
+    container_renderer_args = RendererArgs(
+        Path(container_template_file), Path(container_schema_file), Path(container_data_file)
+    )
+    errors = container_renderer_args.validate()
+    if errors:
+        print("Errors validating container renderer args:")
+        for e in errors:
+            print(f"-  {e}")
+        sys.exit(1)
 
     if not (args.container and args.test_case):
         print("Error: you must provide BOTH --container and --test-case arguments")
@@ -250,20 +286,9 @@ def parse_and_validate_args(argv) -> tuple[Optional[Path], Path, Path, Path, lis
     for fpath in args.test_case:
         assert Path(fpath).exists(), f"File not found: {fpath}"
 
-    if not YamlSchemaValidator(
-        container_data_file, YamlSchemaValidator.load_json_schema(container_schema_file)[1]
-    ).validate_and_report():
-        print("Error validating container data file")
-        sys.exit(1)
     test_case_schema = args.test_case[0]
     test_case_template = args.test_case[1]
     test_case_files = args.test_case[2:]
-    assert test_case_schema.endswith(
-        (".json", ".yaml", ".yml")
-    ), f"Test Case data file must be JSON or YAML: {test_case_schema}"
-
-    assert test_case_template.endswith(".j2"), f"Test Case template end with .j2: {test_case_template}"
-
     assert (
         len(test_case_files) >= 1
     ), f"At least ONE test case files must be provided: {test_case_files} (len={len(test_case_files)})"
@@ -272,18 +297,21 @@ def parse_and_validate_args(argv) -> tuple[Optional[Path], Path, Path, Path, lis
         set(test_case_files)
     ), f"Duplicate test case files provided: {', '.join(_repeated_elements(test_case_files))}. The whole list is: {test_case_files}."
 
+    test_case_renderers = []
     for test_case_file in test_case_files:
-        if not YamlSchemaValidator(
-            test_case_file, YamlSchemaValidator.load_json_schema(test_case_schema)[1]
-        ).validate_and_report():
-            print(f"Error validating test case file: {test_case_file}")
+        renderer_args = RendererArgs(Path(test_case_template), Path(test_case_schema), Path(test_case_file))
+        errors = renderer_args.validate()
+        if errors:
+            print(f"Errors validating test case renderer args: {test_case_file}")
+            for e in errors:
+                print(f"-  {e}")
             sys.exit(1)
-    return (
+        test_case_renderers.append(renderer_args)
+
+    return TestPlanRendererArgsOutput(
         args.output_file,
-        Path(container_template_file),
-        Path(container_data_file),
-        Path(test_case_template),
-        [Path(x) for x in test_case_files],
+        container_renderer_args,
+        test_case_renderers,
     )
 
 

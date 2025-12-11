@@ -475,6 +475,8 @@ Date: {{ container.date }}
             testcase_file,
         )
 
+        print(result.stdout)
+
         with open(output_file) as f:
             output_content = f.read()
 
@@ -633,6 +635,8 @@ Date: {{ container.date }}
             testcase_template,
             testcase_file,
         )
+
+        print(result.stdout)
 
         self.assertTrue(os.path.exists(output_file))
 
