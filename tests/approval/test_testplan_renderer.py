@@ -2,13 +2,531 @@
 import json
 import os
 import shutil
+import sys
 import tempfile
 import unittest
+from pathlib import Path
 
 import pytest
 from jinja2 import TemplateSyntaxError
 
-from testplan_renderer import TestPlanRenderer
+sys.path.append(os.path.join(os.path.dirname(__file__), Path("..") / ".."))
+from testplan_renderer import TestPlanRenderer, parse_and_validate_args
+
+
+class TestParseAndValidateArgsSuccess(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_parse_valid_json_input_only(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(error)
+        self.assertIsNotNone(parsed_args)
+        self.assertEqual(parsed_args["input_file"], json_file)
+        self.assertIsNone(parsed_args["output_file"])
+        self.assertIsNotNone(parsed_args["template_file"])
+
+    def test_parse_valid_yaml_input_only(self):
+        yaml_file = os.path.join(self.temp_dir, "test.yaml")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(yaml_file, "w") as f:
+            f.write("")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([yaml_file])
+
+        self.assertIsNone(error)
+        self.assertIsNotNone(parsed_args)
+        self.assertEqual(parsed_args["input_file"], yaml_file)
+
+    def test_parse_valid_yml_extension(self):
+        yml_file = os.path.join(self.temp_dir, "test.yml")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(yml_file, "w") as f:
+            f.write("")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([yml_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], yml_file)
+
+    def test_parse_with_output_file(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        output_file = "output.md"
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, output_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+        self.assertEqual(parsed_args["output_file"], output_file)
+
+    def test_parse_with_custom_template(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        custom_template = os.path.join(self.temp_dir, "custom.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(custom_template, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, "--template", custom_template])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+        self.assertEqual(parsed_args["template_file"], custom_template)
+
+    def test_parse_with_output_and_template(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        custom_template = os.path.join(self.temp_dir, "custom.j2")
+        output_file = "output.md"
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(custom_template, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, output_file, "--template", custom_template])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+        self.assertEqual(parsed_args["output_file"], output_file)
+        self.assertEqual(parsed_args["template_file"], custom_template)
+
+    def test_parse_template_before_output(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        custom_template = os.path.join(self.temp_dir, "custom.j2")
+        output_file = "output.md"
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(custom_template, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, "--template", custom_template, output_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+        self.assertEqual(parsed_args["output_file"], output_file)
+        self.assertEqual(parsed_args["template_file"], custom_template)
+
+
+class TestParseAndValidateArgsMissingRequired(unittest.TestCase):
+    def test_no_arguments_returns_error(self):
+        parsed_args, error = parse_and_validate_args([])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Missing required argument", error)
+
+    def test_empty_args_list_returns_error(self):
+        parsed_args, error = parse_and_validate_args([])
+
+        self.assertIsNone(parsed_args)
+        self.assertEqual(error, "Missing required argument: input_file")
+
+
+class TestParseAndValidateArgsInputFileValidation(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_nonexistent_input_file_returns_error(self):
+        nonexistent_file = "/nonexistent/path/test.json"
+
+        parsed_args, error = parse_and_validate_args([nonexistent_file])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Input file not found", error)
+        self.assertIn(nonexistent_file, error)
+
+    def test_unsupported_file_format_returns_error(self):
+        txt_file = os.path.join(self.temp_dir, "test.txt")
+        with open(txt_file, "w") as f:
+            f.write("content")
+
+        parsed_args, error = parse_and_validate_args([txt_file])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Unsupported file format", error)
+        self.assertIn(".json, .yaml, or .yml", error)
+
+    def test_xml_file_returns_error(self):
+        xml_file = os.path.join(self.temp_dir, "test.xml")
+        with open(xml_file, "w") as f:
+            f.write("<root></root>")
+
+        parsed_args, error = parse_and_validate_args([xml_file])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Unsupported file format", error)
+
+    def test_no_extension_file_returns_error(self):
+        no_ext_file = os.path.join(self.temp_dir, "testfile")
+        with open(no_ext_file, "w") as f:
+            f.write("content")
+
+        parsed_args, error = parse_and_validate_args([no_ext_file])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Unsupported file format", error)
+
+
+class TestParseAndValidateArgsTemplateValidation(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_nonexistent_template_file_returns_error(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        with open(json_file, "w") as f:
+            f.write("{}")
+
+        parsed_args, error = parse_and_validate_args([json_file, "--template", "/nonexistent/template.j2"])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Template file not found", error)
+
+    def test_missing_template_after_flag_returns_error(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        with open(json_file, "w") as f:
+            f.write("{}")
+
+        parsed_args, error = parse_and_validate_args([json_file, "--template"])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Missing template file after --template", error)
+
+
+class TestParseAndValidateArgsEdgeCases(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_file_with_spaces_in_name(self):
+        json_file = os.path.join(self.temp_dir, "test plan with spaces.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+
+    def test_file_with_special_characters(self):
+        json_file = os.path.join(self.temp_dir, "test-plan_v1.0.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+
+    def test_file_with_unicode_characters(self):
+        json_file = os.path.join(self.temp_dir, "测试计划.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+
+    def test_output_file_with_spaces(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        output_file = "output file with spaces.md"
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, output_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["output_file"], output_file)
+
+    def test_output_file_with_special_characters(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        output_file = "output-file_v2.0@test.md"
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, output_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["output_file"], output_file)
+
+    def test_template_with_special_characters(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "template-detailed_v1.0.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, "--template", template_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["template_file"], template_file)
+
+    def test_relative_path_input_file(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        rel_path = os.path.relpath(json_file)
+        parsed_args, error = parse_and_validate_args([rel_path])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], rel_path)
+
+    def test_absolute_path_input_file(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        abs_path = os.path.abspath(json_file)
+        parsed_args, error = parse_and_validate_args([abs_path])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], abs_path)
+
+    def test_multiple_output_files_last_one_wins(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, "output1.md", "output2.md"])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["output_file"], "output2.md")
+
+    def test_dot_json_in_middle_of_filename(self):
+        json_file = os.path.join(self.temp_dir, "test.json.backup.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+
+    def test_uppercase_extension(self):
+        json_file = os.path.join(self.temp_dir, "test.JSON")
+        with open(json_file, "w") as f:
+            f.write("{}")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Unsupported file format", error)
+
+    def test_mixed_case_yaml_extension(self):
+        yaml_file = os.path.join(self.temp_dir, "test.YAML")
+        with open(yaml_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([yaml_file])
+
+        self.assertIsNone(parsed_args)
+        self.assertIsNotNone(error)
+        self.assertIn("Unsupported file format", error)
+
+
+class TestParseAndValidateArgsComplexScenarios(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_deeply_nested_input_file_path(self):
+        nested_dir = os.path.join(self.temp_dir, "a", "b", "c", "d")
+        os.makedirs(nested_dir, exist_ok=True)
+        json_file = os.path.join(nested_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["input_file"], json_file)
+
+    def test_deeply_nested_template_path(self):
+        nested_dir = os.path.join(self.temp_dir, "templates", "custom")
+        os.makedirs(nested_dir, exist_ok=True)
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(nested_dir, "custom.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, "--template", template_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["template_file"], template_file)
+
+    def test_output_file_with_nested_path(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        output_file = "output/nested/path/file.md"
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, output_file])
+
+        self.assertIsNone(error)
+        self.assertEqual(parsed_args["output_file"], output_file)
+
+    def test_file_path_with_dots(self):
+        json_file = os.path.join(self.temp_dir, "../", os.path.basename(self.temp_dir), "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(os.path.join(self.temp_dir, "test.json"), "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIsNone(error)
+
+    def test_symlink_to_input_file(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        symlink_file = os.path.join(self.temp_dir, "link.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        try:
+            os.symlink(json_file, symlink_file)
+            parsed_args, error = parse_and_validate_args([symlink_file])
+
+            self.assertIsNone(error)
+            self.assertEqual(parsed_args["input_file"], symlink_file)
+        except (OSError, NotImplementedError):
+            pass
+
+
+class TestParseAndValidateArgsReturnFormat(unittest.TestCase):
+    def setUp(self):
+        self.temp_dir = tempfile.mkdtemp()
+
+    def tearDown(self):
+        shutil.rmtree(self.temp_dir)
+
+    def test_success_returns_tuple_with_dict_and_none(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        result = parse_and_validate_args([json_file])
+
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 2)
+        self.assertIsInstance(result[0], dict)
+        self.assertIsNone(result[1])
+
+    def test_error_returns_tuple_with_none_and_string(self):
+        result = parse_and_validate_args([])
+
+        self.assertIsInstance(result, tuple)
+        self.assertEqual(len(result), 2)
+        self.assertIsNone(result[0])
+        self.assertIsInstance(result[1], str)
+
+    def test_success_dict_contains_all_keys(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file])
+
+        self.assertIn("input_file", parsed_args)
+        self.assertIn("output_file", parsed_args)
+        self.assertIn("template_file", parsed_args)
+
+    def test_success_dict_has_correct_types(self):
+        json_file = os.path.join(self.temp_dir, "test.json")
+        template_file = os.path.join(self.temp_dir, "testplan_default.j2")
+        output_file = "output.md"
+        with open(json_file, "w") as f:
+            f.write("{}")
+        with open(template_file, "w") as f:
+            f.write("")
+
+        parsed_args, error = parse_and_validate_args([json_file, output_file])
+
+        self.assertIsInstance(parsed_args["input_file"], str)
+        self.assertIsInstance(parsed_args["output_file"], str)
+        self.assertIsInstance(parsed_args["template_file"], str)
 
 
 class TestTestPlanRendererInit(unittest.TestCase):

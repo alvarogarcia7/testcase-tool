@@ -18,7 +18,7 @@ verify-virtualenv:
 test: verify-virtualenv
 	uv run pytest . -v
 	uv run python testcase_validator.py data/dataset_4_GSMA/test_case/schema.json data/dataset_4_GSMA/test_case/gsma_4.4.2.2_TC.yml
-	D=./data/dataset_4_GSMA/ uv run python testplan_renderer_gsma.py --container $D/container/schema.json $D/container/template.j2 $D/container/data.yml --test-case $D/test_case/schema.json $D/test_case/template.j2 $D/test_case/*yml
+	$(eval D=./data/dataset_4_GSMA) uv run python testplan_renderer_gsma.py --container ${D}/container/schema.json ${D}/container/template.j2 ${D}/container/data.yml --test-case ${D}/test_case/schema.json ${D}/test_case/template.j2 ${D}/test_case/*yml
 .PHONY: test
 
 lint: verify-virtualenv

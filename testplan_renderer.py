@@ -1,10 +1,73 @@
 #!/usr/bin/env python3
 import json
+import os
 import sys
 from pathlib import Path
+from typing import Optional, Tuple, Dict, Any
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
+
+
+def parse_and_validate_args(argv: list) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """Parse and validate command-line arguments for the test plan renderer.
+
+    Args:
+        argv: List of command-line arguments (without the program name)
+
+    Returns:
+        Tuple of (parsed_args_dict, error_string):
+        - On success: (dict with keys 'input_file', 'output_file', 'template_file', None)
+        - On error: (None, error_message_string)
+    """
+    if not argv:
+        return None, "Missing required argument: input_file"
+
+    input_file = argv[0]
+    output_file = None
+    template_file = None
+
+    # Validate input file exists
+    if not os.path.exists(input_file):
+        return None, f"Input file not found: {input_file}"
+
+    # Validate input file extension
+    valid_extensions = ('.json', '.yaml', '.yml')
+    if not input_file.endswith(valid_extensions):
+        return None, f"Unsupported file format: {input_file}. Supported formats: .json, .yaml, or .yml"
+
+    # Parse remaining arguments
+    i = 1
+    while i < len(argv):
+        if argv[i] == "--template" and i + 1 < len(argv):
+            template_file = argv[i + 1]
+            i += 2
+        else:
+            output_file = argv[i]
+            i += 1
+
+    # If --template flag was used but no file follows
+    if len(argv) > 1 and argv[-1] == "--template":
+        return None, "Missing template file after --template flag"
+
+    # Validate template file if provided
+    if template_file:
+        if not os.path.exists(template_file):
+            return None, f"Template file not found: {template_file}"
+    else:
+        # Use default template if not provided
+        script_dir = Path(__file__).parent
+        default_template = script_dir / "tests" / "approval" / "testplan_default.j2"
+        if default_template.exists():
+            template_file = str(default_template)
+        else:
+            return None, "Default template 'testplan_default.j2' not found"
+
+    return {
+        "input_file": input_file,
+        "output_file": output_file,
+        "template_file": template_file
+    }, None
 
 
 class TestPlanRenderer:
