@@ -40,6 +40,7 @@ document SHALL be interpreted as described in RFC 2119 [20].
 ## 4.2.2.2 Test Case: 4.2.2.2.1 TC_eUICC_ES6.UpdateMetadata
 
 **Requirement**: XXX100
+
 **Item**: 1
 
 ## Description
@@ -60,7 +61,7 @@ when the profile is in the operational state and PPR1 is currently set.
 
 
 | **Step Number** | **Action** | **Expected Result** | **Expected Output** |
-| ------------- | --------- | --------- |
+| --------------- | ---------- | ------------------- | --------------------|
 | 1 | MTD_SENDS_SMS_PP([INSTALL_PERSO_RES_ISDP]; MTD_STORE_DATA_SCRIPT(#REMOVE_PPR1, FALSE)) | SW=0x91XX | This operation was successful. |
 | 2 | Fetch 'XX' | MTD_CHECK_SMS_POR(0x9000) | This operation was successful. |
 
@@ -72,7 +73,7 @@ icon type values from a Profile.
 
 
 | **Step Number** | **Action** | **Expected Result** | **Expected Output** |
-| ------------- | --------- | --------- |
+| --------------- | ---------- | ------------------- | --------------------|
 | 1 | MTD_SENDS_SMS_PP([INSTALL_PERSO_RES_ISDP]; MTD_STORE_DATA_SCRIPT(#REMOVE_PPR1, FALSE)) | SW=0x91XX | This operation was successful. |
 | 2 | Fetch 'XX' | MTD_CHECK_SMS_POR(0x9000) | This operation was successful. |
 

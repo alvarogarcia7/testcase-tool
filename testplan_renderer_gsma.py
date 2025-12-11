@@ -88,7 +88,7 @@ class GenericTestPlanRenderer(ABC):
             rendered = self._actual_render(template)
 
             if output_file:
-                with open(output_file, "w") as f:
+                with open(output_file, "a+") as f:
                     f.write(rendered)
             else:
                 print(rendered)
@@ -163,6 +163,15 @@ def usage(return_code):
 
 def main(argv=None):
     parsed_args = parse_and_validate_args(argv)
+
+    if parsed_args.output_file and parsed_args.output_file.exists():
+        print(f"Output file '{parsed_args.output_file}' already exists. Deleting it.")
+        os.unlink(parsed_args.output_file)
+
+    if parsed_args.output_file:
+        assert not Path(
+            parsed_args.output_file
+        ).exists(), f"Cannot continue if file already exists: {parsed_args.output_file}"
 
     errors = []
     for fpath in [tcr.data_file for tcr in parsed_args.test_case_renderers]:

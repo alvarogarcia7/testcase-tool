@@ -1,6 +1,7 @@
 ## {{ toc_entry }} Test Case: {{ tc.id }}
 
 **Requirement**: {{ tc.requirement }}
+
 **Item**: {{ tc.item }}
 
 ## Description
@@ -27,7 +28,7 @@
 {{ ts.description }}
 
 | **Step Number** | **Action** | **Expected Result** | **Expected Output** |
-| ------------- | --------- | --------- |
+| --------------- | ---------- | ------------------- | --------------------|
 {% for step in ts.steps -%}
 | {{ step.step }} | {{ step.description }} | {{ step.expected.result }} | {{ step.expected.output }} |
 {% endfor %}
