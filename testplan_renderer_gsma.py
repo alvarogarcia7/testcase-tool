@@ -182,7 +182,8 @@ def main(argv=None):
             continue
         print(f"----- Rendering test case file: {fpath} -----")
         test_plan_md = (parsed_args.container_renderer.template_file.parent / "test_plan.md").resolve()
-        os.unlink(test_plan_md)
+        if test_plan_md.exists():
+            os.unlink(test_plan_md)
         assert not Path(test_plan_md).exists(), f"Test plan markdown still exists before creating it: {test_plan_md}"
         if not renderer.render(
             template_path=parsed_args.test_case_renderers[0].template_file, output_file=test_plan_md
