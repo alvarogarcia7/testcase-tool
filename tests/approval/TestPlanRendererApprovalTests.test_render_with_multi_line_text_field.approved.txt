@@ -1,0 +1,34 @@
+Result code: 0
+Standard Output (starting on the new line):
+# Test Plan: Multi-line Description Plan
+
+**Plan ID:** 13001
+**Type:** N/A
+**Product:** MultiLineApp
+**Version:** N/A
+**Author:** N/A
+**Created:** N/A
+
+## Description
+
+This is a multi-line description.
+
+It contains multiple paragraphs.
+
+- Bullet point 1
+- Bullet point 2
+- Bullet point 3
+
+And some final text.
+
+## Test Runs
+
+
+Total test runs: 1
+
+
+- **Run 1301**: Run with notes
+
+
+
+Standard Error (starting on the new line):

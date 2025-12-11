@@ -1,0 +1,65 @@
+# Test Plan: Detailed Test Plan
+
+================================================================================
+
+## Plan Information
+
+| Field | Value |
+|-------|-------|
+| **Plan ID** | 2001 |
+| **Type** | Integration |
+| **Product** | WebApp |
+| **Version** | 2.5 |
+| **Author** | Jane Smith |
+| **Created** | 2024-02-20 |
+
+## Description
+
+Comprehensive test plan with detailed information.
+
+================================================================================
+
+## Test Runs
+
+
+Total test runs: 1
+
+
+### Run 1: Integration Test Run
+
+| Field | Value |
+|-------|-------|
+| **Run ID** | 201 |
+| **Summary** | Integration Test Run |
+| **Plan** | 2001 |
+| **Build** | 2.5.0-beta1 |
+| **Manager** | Alice Manager |
+| **Default Tester** | Bob Tester |
+| **Start Date** | 2024-02-25 |
+| **Stop Date** | 2024-02-28 |
+| **Planned Start** | 2024-02-25T09:00:00 |
+| **Planned Stop** | 2024-02-28T17:00:00 |
+
+
+**Notes:**
+
+Critical integration tests for release.
+
+
+---
+
+
+
+
+================================================================================
+
+## Summary
+
+- **Plan Name:** Detailed Test Plan
+- **Plan ID:** 2001
+- **Type:** Integration
+- **Product:** WebApp
+- **Version:** 2.5
+- **Author:** Jane Smith
+- **Created:** 2024-02-20
+- **Total Test Runs:** 1

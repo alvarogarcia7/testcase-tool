@@ -1,0 +1,22 @@
+# Test Plan: 测试计划 🚀
+
+**Plan ID:** 9001
+**Type:** Тест
+**Product:** Produit
+**Version:** 1.0
+**Author:** José García
+**Created:** 2024-06-01
+
+## Description
+
+Description with émojis 😊 and 中文字符
+
+## Test Runs
+
+
+Total test runs: 1
+
+
+- **Run 901**: Тестовый прогон with symbols: @#$%
+
+

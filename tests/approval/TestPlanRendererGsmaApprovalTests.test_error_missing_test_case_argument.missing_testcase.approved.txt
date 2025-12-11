@@ -1,0 +1,6 @@
+usage: testplan_renderer_gsma.py [-h] [-o OUTPUT_FILE] --container
+                                 CONTAINER_SCHEMA CONTAINER_TEMPLATE
+                                 CONTAINER_FILE --test-case TEST_CASE_SCHEMA
+                                 [TEST_CASE_TEMPLATE TEST_CASE_FILE [REST_TEST_CASE_FILES]
+                                 ...]
+testplan_renderer_gsma.py: error: the following arguments are required: --test-case

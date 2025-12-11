@@ -1,0 +1,11 @@
+Usage: python testplan_renderer.py <input_file> [output_file] [--template <template_file>]
+
+Arguments:
+  input_file    - TestPlan data file (JSON or YAML)
+  output_file   - Output file (optional, prints to stdout if not provided)
+  --template    - Custom template file (optional, uses testplan_default.j2 if not provided)
+
+Examples:
+  python testplan_renderer.py plan.json
+  python testplan_renderer.py plan.yaml output.md
+  python testplan_renderer.py plan.json output.md --template testplan_detailed.j2

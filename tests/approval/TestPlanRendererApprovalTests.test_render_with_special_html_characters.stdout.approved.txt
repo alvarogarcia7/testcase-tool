@@ -1,0 +1,18 @@
+# Test Plan: Plan with <HTML> & "quotes"
+
+**Plan ID:** 10001
+**Type:** Type with 'apostrophes'
+**Product:** Product & Co.
+**Version:** 1.0
+**Author:** Author <test@example.com>
+**Created:** N/A
+
+## Description
+
+Text with <b>tags</b> and & symbols
+
+## Test Runs
+
+
+No test runs associated with this test plan.
+

@@ -1,6 +1,7 @@
 import os
 import pprint
 import xml.etree.ElementTree as ET
+
 from tcms_api import TCMS
 
 username = os.environ.get("KIWI_TCMS_USERNAME")
@@ -74,7 +75,7 @@ for tc in testcases:
 
     # Optional attach to plan
     if TESTPLAN_ID:
-        tcms.TestPlan.add_case(TESTPLAN_ID,created["id"])
+        tcms.TestPlan.add_case(TESTPLAN_ID, created["id"])
 
 
 print(f"\nSuccessfully uploaded {len(created_cases)} cases.")

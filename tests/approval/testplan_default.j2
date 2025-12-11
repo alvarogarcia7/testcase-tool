@@ -13,7 +13,7 @@
 
 ## Test Runs
 
-{% if plan.test_runs %}
+{% if "test_runs" in plan and plan.test_runs %}
 Total test runs: {{ plan.test_runs|length }}
 
 {% for run in plan.test_runs %}

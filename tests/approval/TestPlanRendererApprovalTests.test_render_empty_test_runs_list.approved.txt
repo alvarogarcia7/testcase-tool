@@ -1,0 +1,22 @@
+Result code: 0
+Standard Output (starting on the new line):
+# Test Plan: Plan Without Runs
+
+**Plan ID:** 6001
+**Type:** Smoke
+**Product:** TestProduct
+**Version:** 1.0
+**Author:** Tester
+**Created:** 2024-04-01
+
+## Description
+
+Test plan with no test runs.
+
+## Test Runs
+
+
+No test runs associated with this test plan.
+
+
+Standard Error (starting on the new line):
