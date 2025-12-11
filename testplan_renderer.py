@@ -3,7 +3,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Optional, Tuple, Dict, Any
+from typing import Any, Dict, Optional, Tuple
 
 import yaml
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, Template
@@ -32,7 +32,7 @@ def parse_and_validate_args(argv: list) -> Tuple[Optional[Dict[str, Any]], Optio
         return None, f"Input file not found: {input_file}"
 
     # Validate input file extension
-    valid_extensions = ('.json', '.yaml', '.yml')
+    valid_extensions = (".json", ".yaml", ".yml")
     if not input_file.endswith(valid_extensions):
         return None, f"Unsupported file format: {input_file}. Supported formats: .json, .yaml, or .yml"
 
@@ -63,11 +63,7 @@ def parse_and_validate_args(argv: list) -> Tuple[Optional[Dict[str, Any]], Optio
         else:
             return None, "Default template 'testplan_default.j2' not found"
 
-    return {
-        "input_file": input_file,
-        "output_file": output_file,
-        "template_file": template_file
-    }, None
+    return {"input_file": input_file, "output_file": output_file, "template_file": template_file}, None
 
 
 class TestPlanRenderer:
