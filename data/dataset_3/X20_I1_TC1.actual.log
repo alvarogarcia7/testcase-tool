@@ -1,7 +1,0 @@
-# Execution Log for Test Case X20_1
-# User Login Authentication Test
-# Executed: 2025-01-15T14:23:45Z
-# Environment: staging
-
-$ / -> ls
-/usr /bin  /etc  /home  /var  /tmp  /opt  /lib  /sbin  /root  /dev  /proc  /sys
