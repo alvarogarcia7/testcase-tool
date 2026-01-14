@@ -12,6 +12,10 @@ def G(d, *keys, default=""):
     return d if d is not None else default
 
 
+def comment(lines: list[str]):
+    return list(map(lambda line: f"# {line}", lines))
+
+
 class TestCaseParser:
     def __init__(self, yaml_file):
         self.yaml_file, self.test_case, self.actual_log = yaml_file, None, None
@@ -49,11 +53,16 @@ class TestCaseParser:
             print("Error: No test case loaded")
             return False
         tc = self.test_case
-        tid, desc = tc.get("testcase_id", "unknown"), tc.get("description", "").strip()
+        requirement_id = tc.get("requirement")
+        tid = requirement_id
+        item_no = tc.get("item")
+        testcase = tc.get("tc")
+        description = tc.get("description", "").strip()
         L = [
             "#!/bin/bash",
             f"# Test Case: {tid}",
             f"# Requirement: {tc.get('requirement_id', 'N/A')}",
+            f"# **Requirement ID**: {requirement_id}, Item {item_no}, Test Case {testcase}",
             "",
             "set -e",
             "",
@@ -64,7 +73,7 @@ class TestCaseParser:
             "",
             'echo "="*80',
             f'echo "Test Case: {tid}"',
-            f'echo "Description: {desc.split(chr(10))[0] if desc else "N/A"}"',
+            f'echo "Description: {description.split(chr(10))[0] if description else "N/A"}"',
             'echo "="*80',
             "",
         ]
@@ -96,26 +105,24 @@ class TestCaseParser:
                 "check_prerequisites || exit 1",
                 "",
             ]
-        cmds = tc.get("commands", [])
-        if cmds:
-            L += ["# " + "=" * 76, "# TEST EXECUTION", "# " + "=" * 76, ""]
-            for step in cmds:
-                sn, sd = step.get("step", 0), step.get("description", f"Step {step.get('step', 0)}")
-                L.append(f"# Step {sn}: {sd}")
-                if step.get("notes"):
-                    L.append(f"# Note: {step['notes']}")
-                L += ['echo ""', f'echo "${{YELLOW}}Step {sn}: {sd}${{NC}}"', 'echo "-"*80', ""]
-                for i, cmd in enumerate(step.get("commands", []), 1):
-                    cs = cmd.strip() if isinstance(cmd, str) else str(cmd)
-                    L += [
-                        f'echo "Executing command {i}..."',
-                        f'echo "Command: {cs.split(chr(10))[0]}{"..." if chr(10) in cs else ""}"',
-                        "",
-                        cs,
-                        f"STEP{sn}_CMD{i}_STATUS=$?",
-                        "",
-                    ]
-                L += [f'echo "${{GREEN}}Step {sn} completed${{NC}}"', ""]
+        desc = tc.get("description", "").strip()
+        L += comment(["# Description", "", desc or "*No description provided*", ""])
+        prereqs = tc.get("prerequisites", [])
+        if prereqs:
+            L += comment(["# Prerequisites", ""] + [f"- {p}" for p in prereqs] + [""])
+        for test_sequence in tc.get("test_sequences"):
+            L += [f"## Test Sequence: {test_sequence.get('name', 'N/A')}"]
+            L += ["## Test Steps"]
+            for step in test_sequence.get("steps", []):
+                sn = step.get("step", 0)
+                L += [f"### Step {sn}: {step.get('description', f'Step {sn}')}"]
+                command = step.get("command", None)
+                if command:
+                    if isinstance(command, str):
+                        L += [command]
+                    elif isinstance(command, list):
+                        L += [c.strip() for c in command]
+                L += [f"### End of step {sn}", ""]
         exp = tc.get("expected_result", {})
         vcmds, eouts = exp.get("verification_commands", []), exp.get("expected_outputs", [])
         if vcmds or eouts:
@@ -166,13 +173,11 @@ class TestCaseParser:
             print("Error: No test case loaded")
             return False
         tc = self.test_case
-        tc_parts = tc.get("id").split("TC")
-        assert len(tc_parts) == 2, f"Invalid test case ID: {tc.get('id')}"
-        parts_ = tc_parts[0]
-        requirement_id = parts_.split("_")[0]
-        item_no = parts_.split("I")[1].split("_")[0]
+        requirement_id = tc.get("requirement")
+        item_no = tc.get("item")
+        testcase = tc.get("tc")
         L = [
-            f"# **Requirement ID**: {requirement_id}, Item {item_no}, Test Case {tc_parts[1]}",
+            f"# **Requirement ID**: {requirement_id}, Item {item_no}, Test Case {testcase}",
             "",
         ]
         meta = tc.get("metadata", {})
@@ -183,21 +188,20 @@ class TestCaseParser:
         if meta:
             L.append("")
         desc = tc.get("description", "").strip()
-        L += ["## Description", "", desc or "*No description provided*", ""]
+        L += comment(["Description", "", desc or "*No description provided*", ""])
         prereqs = tc.get("prerequisites", [])
         if prereqs:
-            L += ["## Prerequisites", ""] + [f"- {p}" for p in prereqs] + [""]
-        cmds = tc.get("commands", [])
-        if cmds:
+            L += comment(["Prerequisites", ""] + [f"- {p}" for p in prereqs] + [""])
+        for test_sequence in tc.get("test_sequences", []):
+            L += [f"## Test Sequence: {test_sequence.get('name', 'N/A')}"]
             L += ["## Test Steps", ""]
-            for step in cmds:
+            for step in test_sequence.get("steps", []):
                 sn = step.get("step", 0)
                 L += [f"### Step {sn}: {step.get('description', f'Step {sn}')}", ""]
-                if step.get("notes"):
-                    L += [f"*Note: {step['notes']}*", ""]
-                L += ["**Commands:**", "```bash"]
-                L += [c.strip() if isinstance(c, str) else str(c) for c in step.get("commands", [])]
-                L += ["```", ""]
+                L += comment([f"- {step.get('description', 'N/A')}", ""])
+                command = step.get("command", [])
+                if command:
+                    L += [c.strip() if isinstance(c, str) else str(c) for c in step.get("commands", [])]
         exp = tc.get("expected_result", {})
         if exp:
             L += ["## Expected Result", ""]
@@ -299,11 +303,10 @@ def main():
     if not p.load_test_case():
         sys.exit(1)
     p.load_actual_log()
-    sh, md = Path(out_dir) / f"{base.stem}.sh", Path(out_dir) / f"{base.stem}.md"
-    if p.generate_shell_script(str(sh)) and p.generate_markdown(str(md)):
-        print(f"\nGeneration completed!\n  Shell script: {sh}\n  Markdown doc: {md}")
+    sh = Path(out_dir) / f"{base.stem}.sh"
+    if p.generate_shell_script(str(sh)):
+        print(f"\nGeneration completed!\n  Shell script: {sh}")
     else:
-        print("\nGeneration completed with errors")
         sys.exit(1)
 
 

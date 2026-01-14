@@ -59,13 +59,13 @@ jobs:
 
     - name: Generate GSMA Test Plan Report
       run: |
-        uv run python testplan_renderer_gsma.py \
-          --container ./data/dataset_4_GSMA/container/schema.json \
-                     ./data/dataset_4_GSMA/container/template.j2 \
-                     ./data/dataset_4_GSMA/container/data.yml \
-          --test-case ./data/dataset_4_GSMA/test_case/schema.json \
-                      ./data/dataset_4_GSMA/test_case/template.j2 \
-                      ./data/dataset_4_GSMA/test_case/*yml \
+        uv run python testplan_renderer.py \
+          --container ./data/container/schema.json \
+                     ./data/container/template.j2 \
+                     ./data/container/data.yml \
+          --test-case ./data/test_case/schema.json \
+                      ./data/test_case/template.j2 \
+                      ./data/test_case/*yml \
           -o report.md
 
     - name: Upload generated report
