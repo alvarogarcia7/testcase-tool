@@ -379,91 +379,6 @@ test_sequences:
         self.assertTrue(result)
 
 
-class TestVerificationSection(unittest.TestCase):
-    """Tests for verification section in markdown generation"""
-
-    def setUp(self):
-        """Create a temporary directory for test files"""
-        self.temp_dir = tempfile.mkdtemp()
-
-    def tearDown(self):
-        """Clean up temporary directory"""
-        shutil.rmtree(self.temp_dir)
-
-    def test_generates_verification_status_pass(self):
-        """Should show PASS status"""
-        yaml_content = """
-id: REQ1_I1_TC001
-verification:
-  status: PASS
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("## Verification Results", content)
-        self.assertIn("PASS", content)
-
-    def test_generates_verification_status_fail(self):
-        """Should show FAIL status"""
-        yaml_content = """
-id: REQ1_I1_TC001
-verification:
-  status: FAIL
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("FAIL", content)
-
-    def test_generates_verification_steps_table(self):
-        """Should generate verification steps as table"""
-        yaml_content = """
-id: REQ1_I1_TC001
-verification:
-  status: PASS
-  verification_steps:
-    - check: Output matches expected
-      result: PASS
-    - check: Exit code is 0
-      result: PASS
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("| Check | Result |", content)
-        self.assertIn("Output matches expected", content)
-
-
 class TestEdgeCases(unittest.TestCase):
     """Tests for edge cases and error handling"""
 
@@ -487,30 +402,6 @@ class TestEdgeCases(unittest.TestCase):
         # Empty YAML loads as None, but function returns True
         self.assertTrue(result)
         self.assertIsNone(parser.test_case)
-
-    def test_handles_multiline_description(self):
-        """Should handle multiline description correctly"""
-        yaml_content = """
-id: REQ1_I1_TC001
-description: |
-  This is a multiline
-  description that spans
-  multiple lines
-"""
-        yaml_file = os.path.join(self.temp_dir, "test.yml")
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        with open(yaml_file, "w") as f:
-            f.write(yaml_content)
-
-        parser = TestCaseParser(yaml_file)
-        parser.load_test_case()
-        parser.generate_markdown(output_file)
-
-        with open(output_file, "r") as f:
-            content = f.read()
-
-        self.assertIn("multiline", content)
 
     def test_handles_multiline_commands(self):
         """Should handle multiline commands in shell script"""

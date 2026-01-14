@@ -38,7 +38,7 @@ jobs:
 
     - name: Run tests
       run: |
-        uv run python -m unittest discover -v
+        uv run pytest . -v
 
   generate-gsma-report:
     runs-on: ubuntu-latest
