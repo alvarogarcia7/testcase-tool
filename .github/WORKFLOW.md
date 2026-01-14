@@ -127,7 +127,7 @@ make lint
 make test
 
 # Generate report manually
-uv run python testplan_renderer_gsma.py \
+uv run python testplan_renderer.py \
   --container ./data/dataset_4_GSMA/container/schema.json \
               ./data/dataset_4_GSMA/container/template.j2 \
               ./data/dataset_4_GSMA/container/data.yml \

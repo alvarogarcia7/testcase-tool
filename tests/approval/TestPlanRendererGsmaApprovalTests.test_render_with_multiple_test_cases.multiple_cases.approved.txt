@@ -3,26 +3,26 @@ Return Code: 0
 Stdout:
 ----- Command line arguments -----
 output_file: None
-container: ['data/dataset_4_GSMA/container/schema.json', 'data/dataset_4_GSMA/container/template.j2', 'data/dataset_4_GSMA/container/data.yml']
-test_case: ['data/dataset_4_GSMA/test_case/schema.json', 'data/dataset_4_GSMA/test_case/template.j2', 'data/dataset_4_GSMA/test_case/gsma_4.4.2.2_TC.yml', 'data/dataset_4_GSMA/test_case/gsma_4.4.2.3_TC.yml']
+container: ['data/container/schema.json', 'data/container/template.j2', 'data/container/data.yml']
+test_case: ['data/test_case/schema.json', 'data/test_case/template.j2', 'data/test_case/gsma_4.4.2.2_TC.yml', 'data/test_case/gsma_4.4.2.3_TC.yml']
 No output file provided, printing to stdout
-Validating: data/dataset_4_GSMA/container/data.yml
+Validating: data/container/data.yml
 --------------------------------------------------------------------------------
 ✓ Validation successful
 
-File 'data/dataset_4_GSMA/container/data.yml' is valid according to the test case schema.
-Validating: data/dataset_4_GSMA/test_case/gsma_4.4.2.2_TC.yml
+File 'data/container/data.yml' is valid according to the test case schema.
+Validating: data/test_case/gsma_4.4.2.2_TC.yml
 --------------------------------------------------------------------------------
 ✓ Validation successful
 
-File 'data/dataset_4_GSMA/test_case/gsma_4.4.2.2_TC.yml' is valid according to the test case schema.
-Validating: data/dataset_4_GSMA/test_case/gsma_4.4.2.3_TC.yml
+File 'data/test_case/gsma_4.4.2.2_TC.yml' is valid according to the test case schema.
+Validating: data/test_case/gsma_4.4.2.3_TC.yml
 --------------------------------------------------------------------------------
 ✓ Validation successful
 
-File 'data/dataset_4_GSMA/test_case/gsma_4.4.2.3_TC.yml' is valid according to the test case schema.
------ Rendering test case file: data/dataset_4_GSMA/test_case/gsma_4.4.2.2_TC.yml -----
------ Rendering test case file: data/dataset_4_GSMA/test_case/gsma_4.4.2.3_TC.yml -----
+File 'data/test_case/gsma_4.4.2.3_TC.yml' is valid according to the test case schema.
+----- Rendering test case file: data/test_case/gsma_4.4.2.2_TC.yml -----
+----- Rendering test case file: data/test_case/gsma_4.4.2.3_TC.yml -----
 1 Introduction
 1.1 Overview
 The main aim of the GSMA Remote SIM Provisioning specifications [2] & [3] is to provide

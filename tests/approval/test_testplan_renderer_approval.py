@@ -6,22 +6,21 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from pathlib import Path
 
 import approvaltests.approvals
+import yaml
 from approvaltests import verify
 from approvaltests.namer import NamerFactory
-from approvaltests.reporters import PythonNativeReporter  # , ReporterThatAutomaticallyApproves
+from approvaltests.reporters import PythonNativeReporter
 
 
-class TestPlanRendererApprovalTests(unittest.TestCase):
+class TestPlanRendererGsmaApprovalTests(unittest.TestCase):
     """End-to-end approval tests for testplan_renderer.py CLI."""
 
     def setUp(self):
         self.temp_dir = tempfile.mkdtemp()
         self.maxDiff = None
         approvaltests.approvals.set_default_reporter(PythonNativeReporter())
-        # approvaltests.approvals.set_default_reporter(ReporterThatAutomaticallyApproves())
 
     def tearDown(self):
         shutil.rmtree(self.temp_dir)
@@ -37,408 +36,686 @@ Standard Error (starting on the new line):
 
     def _run_cli_result(self, *args):
         """Run testplan_renderer.py CLI and return stdout, stderr, and return code."""
-        assert Path(sys.executable).exists(), "Python interpreter not found."
-        assert Path("testplan_renderer.py").exists(), "testplan_renderer.py not found."
         cmd = [sys.executable, "testplan_renderer.py"] + list(args)
         result = subprocess.run(cmd, capture_output=True, text=True)
         return result
 
-    def _create_test_plan_json(self, filename, data):
-        """Create a test plan JSON file in temp directory."""
+    def _create_container_schema(self, filename="container_schema.json"):
+        """Create a container schema file in temp directory."""
+        schema = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "date": {"type": "string"},
+                "product": {"type": "string"},
+                "description": {"type": "string"},
+            },
+            "required": ["date", "product", "description"],
+        }
         filepath = os.path.join(self.temp_dir, filename)
         with open(filepath, "w") as f:
-            json.dump(data, f, indent=2)
+            json.dump(schema, f, indent=2)
         return filepath
 
-    def _create_test_plan_yaml(self, filename, content):
-        """Create a test plan YAML file in temp directory."""
+    def _create_container_data(self, filename="container_data.yml", **kwargs):
+        """Create a container data file in temp directory."""
+        data = {
+            "date": kwargs.get("date", "2024-01-01"),
+            "product": kwargs.get("product", "Test Product"),
+            "description": kwargs.get("description", "Test Description"),
+        }
+        filepath = os.path.join(self.temp_dir, filename)
+        with open(filepath, "w") as f:
+            yaml.dump(data, f)
+        return filepath
+
+    def _create_container_template(self, filename="container_template.j2", content=None):
+        """Create a container template file in temp directory."""
+        if content is None:
+            content = """# Test Document
+
+Product: {{ container.product }}
+Date: {{ container.date }}
+
+{{ read_file('test_plan.md') }}
+
+---
+{{ container.description }}
+"""
         filepath = os.path.join(self.temp_dir, filename)
         with open(filepath, "w") as f:
             f.write(content)
         return filepath
 
-    def _create_custom_template(self, filename, content):
-        """Create a custom template file in temp directory."""
+    def _create_test_case_schema(self, filename="testcase_schema.json"):
+        """Create a test case schema file in temp directory."""
+        schema = {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "requirement": {"type": "string"},
+                "item": {"type": "integer"},
+                "tc": {"type": "integer"},
+                "id": {"type": "string"},
+                "description": {"type": "string"},
+                "initial_conditions": {"type": "object"},
+                "test_sequences": {"type": "array"},
+            },
+            "required": ["requirement", "item", "tc", "id", "description"],
+        }
+        filepath = os.path.join(self.temp_dir, filename)
+        with open(filepath, "w") as f:
+            json.dump(schema, f, indent=2)
+        return filepath
+
+    def _create_test_case_template(self, filename="testcase_template.j2", content=None):
+        """Create a test case template file in temp directory."""
+        if content is None:
+            content = """\
+# {{ toc_entry }} Test Case: {{ tc.id }}
+
+**Requirement**: {{ tc.requirement }}
+**Item**: {{ tc.item }}
+
+# Description
+
+{{ tc.description }}
+
+{%- if "initial_conditions" in tc -%}
+# General Initial Conditions
+
+| **Entity** | **Description of the general initial condition** |
+| ------------- | --------- |
+{% for entity,conditions in tc.initial_conditions.items() -%}
+{% for condition in conditions -%}
+| {{ entity }} | {{ condition }} |
+{% endfor %}
+{%- endfor %}
+{%- endif -%}
+
+{%- if "test_sequences" in tc -%}
+{% for ts in tc.test_sequences %}
+# Test Sequence {{ ts.id }} {{ ts.name }}
+
+{{ ts.description }}
+
+| **Step Number** | **Action** | **Expected Result** | **Expected Output** |
+| ------------- | --------- | --------- |
+{% for step in ts.steps -%}
+| {{ step.step }} | {{ step.description }} | {{ step.expected.result }} | {{ step.expected.output }} |
+{% endfor %}
+{% endfor %}
+{%- endif -%}
+"""
         filepath = os.path.join(self.temp_dir, filename)
         with open(filepath, "w") as f:
             f.write(content)
         return filepath
 
-    def test_render_with_default_template_and_real_data(self):
-        """Test rendering exported_testplans.json with default template."""
-        verify(self._run_cli("tests/approval/exported_testplans.json"))
+    def _create_test_case_data(self, filename, data):
+        """Create a test case YAML file in temp directory."""
+        filepath = os.path.join(self.temp_dir, filename)
+        with open(filepath, "w") as f:
+            yaml.dump(data, f, default_flow_style=False, allow_unicode=True)
+        return filepath
 
-    def test_render_with_default_template_to_file(self):
-        """Test rendering to output file with default template."""
-        test_data = {
-            "id": 1001,
-            "name": "Sample Test Plan",
-            "type": "Functional",
-            "product": "MyApp",
-            "version": "1.0",
-            "author": "John Doe",
-            "create_date": "2024-01-15",
-            "text": "This is a sample test plan for approval testing.",
-            "test_runs": [
-                {"id": 101, "summary": "Test Run 1"},
-                {"id": 102, "summary": "Test Run 2"},
-            ],
+    def _setup_test_plan_md_placeholder(self, template_dir):
+        """Create placeholder test_plan.md file for container template."""
+        filepath = os.path.join(template_dir, "test_plan.md")
+        with open(filepath, "w") as f:
+            f.write("")
+        return filepath
+
+    def test_render_with_real_gsma_data(self):
+        """Test rendering with real GSMA dataset."""
+        self._setup_test_plan_md_placeholder("data/container")
+
+        result = self._run_cli_result(
+            "--container",
+            "data/container/schema.json",
+            "data/container/template.j2",
+            "data/container/data.yml",
+            "--test-case",
+            "data/test_case/schema.json",
+            "data/test_case/template.j2",
+            "data/test_case/gsma_4.4.2.2_TC.yml",
+        )
+
+        verify(
+            f"Return Code: {result.returncode}\n\nStdout:\n{result.stdout}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("gsma_real").namer,
+        )
+
+    def test_render_with_multiple_test_cases(self):
+        """Test rendering with multiple test case files."""
+        self._setup_test_plan_md_placeholder("data/container")
+
+        result = self._run_cli_result(
+            "--container",
+            "data/container/schema.json",
+            "data/container/template.j2",
+            "data/container/data.yml",
+            "--test-case",
+            "data/test_case/schema.json",
+            "data/test_case/template.j2",
+            "data/test_case/gsma_4.4.2.2_TC.yml",
+            "data/test_case/gsma_4.4.2.3_TC.yml",
+        )
+
+        verify(
+            f"Return Code: {result.returncode}\n\nStdout:\n{result.stdout}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("multiple_cases").namer,
+        )
+
+    def test_render_minimal_test_case(self):
+        """Test rendering with minimal test case data."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data()
+        container_template = self._create_container_template()
+
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
+
+        minimal_testcase = {
+            "requirement": "REQ001",
+            "item": 1,
+            "tc": 1,
+            "id": "1.1.1",
+            "description": "Minimal test case",
         }
+        testcase_file = self._create_test_case_data("minimal_tc.yml", minimal_testcase)
 
-        input_file = self._create_test_plan_json("testplan.json", test_data)
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        result = self._run_cli_result(input_file, output_file)
-
-        self.assertEqual(result.returncode, 0)
-        self.assertTrue(os.path.exists(output_file))
-
-        with open(output_file) as f:
-            content = f.read()
-        verify(content)
-
-    def test_render_with_detailed_template(self):
-        """Test rendering with testplan_detailed.j2 template."""
-        test_data = {
-            "id": 2001,
-            "name": "Detailed Test Plan",
-            "type": "Integration",
-            "product": "WebApp",
-            "version": "2.5",
-            "author": "Jane Smith",
-            "create_date": "2024-02-20",
-            "text": "Comprehensive test plan with detailed information.",
-            "test_runs": [
-                {
-                    "id": 201,
-                    "summary": "Integration Test Run",
-                    "plan": 2001,
-                    "build": "2.5.0-beta1",
-                    "manager": "Alice Manager",
-                    "default_tester": "Bob Tester",
-                    "start_date": "2024-02-25",
-                    "stop_date": "2024-02-28",
-                    "planned_start": "2024-02-25T09:00:00",
-                    "planned_stop": "2024-02-28T17:00:00",
-                    "notes": "Critical integration tests for release.",
-                }
-            ],
-        }
-
-        input_file = self._create_test_plan_json("testplan.json", test_data)
+        self._setup_test_plan_md_placeholder(self.temp_dir)
         output_file = os.path.join(self.temp_dir, "output.md")
 
         result = self._run_cli_result(
-            input_file, output_file, "--template", Path(".") / "tests" / "approval" / "testplan_detailed.j2"
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
         )
 
-        self.assertEqual(result.returncode, 0)
-        self.assertTrue(os.path.exists(output_file))
-
         with open(output_file) as f:
-            content = f.read()
-        verify(content)
+            output_content = f.read()
 
-    def test_render_with_custom_template(self):
-        """Test rendering with a custom template."""
-        # approvaltests.approvals.set_default_reporter(ReporterThatAutomaticallyApproves())
-        test_data = {"id": 3001, "name": "Custom Template Plan", "product": "CustomProduct", "version": "3.0"}
-
-        custom_template = """Plan ID: {{ plan.id }}
-Plan Name: {{ plan.name }}
-Product: {{ plan.product }}
-Version: {{ plan.version }}
-"""
-
-        input_file = self._create_test_plan_json("testplan.json", test_data)
-        template_file = self._create_custom_template("custom.j2", custom_template)
-        output_file = os.path.join(self.temp_dir, "output.txt")
-
-        result = self._run_cli_result(input_file, output_file, "--template", template_file)
-
-        self.assertEqual(0, result.returncode)
-
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
-        with open(output_file) as f:
-            content = f.read()
-        verify(content, namer=NamerFactory.with_parameters("output").namer)
-
-    def test_render_yaml_input_with_default_template(self):
-        """Test rendering YAML input file."""
-        yaml_content = """id: 4001
-name: YAML Test Plan
-type: Unit Test
-product: YAML App
-version: 1.2.3
-author: YAML Author
-create_date: "2024-03-10"
-text: |
-  Multi-line description
-  of the YAML test plan.
-test_runs:
-  - id: 401
-    summary: First YAML Run
-  - id: 402
-    summary: Second YAML Run
-"""
-
-        input_file = self._create_test_plan_yaml("testplan.yaml", yaml_content)
-        output_file = os.path.join(self.temp_dir, "output.md")
-
-        result = self._run_cli_result(input_file, output_file)
-
-        self.assertEqual(0, result.returncode, f"Failed with stderr:{result.stderr}")
-
-        with open(output_file) as f:
-            content = f.read()
-        verify(content)
-
-    def test_render_minimal_test_plan(self):
-        """Test rendering with minimal fields."""
-        test_data = {"id": 5001, "name": "Minimal Plan"}
-
-        input_file = self._create_test_plan_json("minimal.json", test_data)
-
-        verify(self._run_cli(input_file))
-
-    def test_render_empty_test_runs_list(self):
-        """Test rendering with empty test_runs list."""
-        test_data = {
-            "id": 6001,
-            "name": "Plan Without Runs",
-            "type": "Smoke",
-            "product": "TestProduct",
-            "version": "1.0",
-            "author": "Tester",
-            "create_date": "2024-04-01",
-            "text": "Test plan with no test runs.",
-            "test_runs": [],
-        }
-
-        input_file = self._create_test_plan_json("empty_runs.json", test_data)
-
-        verify(self._run_cli(input_file))
-
-    def test_render_missing_optional_fields(self):
-        """Test rendering with missing optional fields."""
-        test_data = {
-            "id": 7001,
-            "name": "Plan with Missing Fields",
-            "test_runs": [{"id": 701, "summary": "Run 1"}, {"id": 702}],
-        }
-
-        input_file = self._create_test_plan_json("missing_fields.json", test_data)
-
-        verify(self._run_cli(input_file))
-
-    def test_render_with_null_values(self):
-        """Test rendering with null values in fields."""
-        test_data = {
-            "id": 8001,
-            "name": "Plan with Nulls",
-            "type": None,
-            "product": "NullProduct",
-            "version": None,
-            "author": None,
-            "create_date": "2024-05-01",
-            "text": None,
-            "test_runs": [{"id": 801, "summary": "Run with nulls", "build": None, "manager": None}],
-        }
-
-        input_file = self._create_test_plan_json("null_values.json", test_data)
-
-        result = self._run_cli_result(input_file)
-
-        self.assertEqual(0, result.returncode)
-
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+        verify(
+            f"Return Code: {result.returncode}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("minimal").namer,
+        )
 
     def test_render_with_unicode_characters(self):
         """Test rendering with unicode and special characters."""
-        test_data = {
-            "id": 9001,
-            "name": "测试计划 🚀",
-            "type": "Тест",
-            "product": "Produit",
-            "version": "1.0",
-            "author": "José García",
-            "create_date": "2024-06-01",
-            "text": "Description with émojis 😊 and 中文字符",
-            "test_runs": [{"id": 901, "summary": "Тестовый прогон with symbols: @#$%"}],
-        }
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data(
+            product="测试产品 🚀",
+            date="2024-01-01",
+            description="Тестовое описание with émojis 😊",
+        )
+        container_template = self._create_container_template()
 
-        input_file = self._create_test_plan_json("unicode.json", test_data)
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
 
-        result = self._run_cli_result(input_file)
-
-        self.assertEqual(0, result.returncode)
-
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
-
-    def test_render_with_special_html_characters(self):
-        """Test rendering with HTML special characters."""
-        test_data = {
-            "id": 10001,
-            "name": 'Plan with <HTML> & "quotes"',
-            "type": "Type with 'apostrophes'",
-            "product": "Product & Co.",
-            "version": "1.0",
-            "author": "Author <test@example.com>",
-            "text": "Text with <b>tags</b> and & symbols",
-        }
-
-        input_file = self._create_test_plan_json("html_chars.json", test_data)
-
-        result = self._run_cli_result(input_file)
-
-        self.assertEqual(0, result.returncode)
-
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
-
-    def test_render_with_nested_data_structures(self):
-        """Test rendering with deeply nested data."""
-        test_data = {
-            "id": 11001,
-            "name": "Nested Data Plan",
-            "product": "NestedApp",
-            "test_runs": [
+        unicode_testcase = {
+            "requirement": "РЕК001",
+            "item": 1,
+            "tc": 1,
+            "id": "测试-1.1.1",
+            "description": "Test with unicode: 中文字符 and émojis 🎉",
+            "initial_conditions": {"eUICC": ["条件一", "条件二"]},
+            "test_sequences": [
                 {
-                    "id": 1101,
-                    "summary": "Complex Run",
-                    "metadata": {
-                        "priority": 1,
-                        "tags": ["critical", "regression", "p0"],
-                        "environment": {"os": "Linux", "browser": "Chrome", "version": "120"},
-                        "configuration": {"timeout": 3600, "retries": 3, "parallel": True},
-                    },
+                    "id": 1,
+                    "name": "Тест последовательность",
+                    "description": "Описание с unicode symbols: @#$%",
+                    "steps": [
+                        {
+                            "step": 1,
+                            "description": "步骤描述",
+                            "command": "ssh",
+                            "expected": {"result": "成功", "output": "Success ✓"},
+                        }
+                    ],
                 }
             ],
         }
+        testcase_file = self._create_test_case_data("unicode_tc.yml", unicode_testcase)
 
-        custom_template = """# {{ plan.name }}
-
-{% for run in plan.test_runs %}
-## {{ run.summary }}
-{% if run.metadata %}
-- Priority: {{ run.metadata.priority }}
-- Tags: {{ run.metadata.tags|join(', ') }}
-- OS: {{ run.metadata.environment.os }}
-- Browser: {{ run.metadata.environment.browser }} v{{ run.metadata.environment.version }}
-- Config: timeout={{ run.metadata.configuration.timeout }}, retries={{ run.metadata.configuration.retries }}
-{% endif %}
-{% endfor %}
-"""
-
-        input_file = self._create_test_plan_json("nested.json", test_data)
-        template_file = self._create_custom_template("nested.j2", custom_template)
+        self._setup_test_plan_md_placeholder(self.temp_dir)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        result = self._run_cli_result(input_file, output_file, "--template", template_file)
+        result = self._run_cli_result(
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
 
-        self.assertEqual(0, result.returncode)
+        with open(output_file, encoding="utf-8") as f:
+            output_content = f.read()
 
-        # verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+        verify(
+            f"Return Code: {result.returncode}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("unicode").namer,
+        )
+
+    def test_render_with_empty_test_sequences(self):
+        """Test rendering with empty test sequences."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data()
+        container_template = self._create_container_template()
+
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
+
+        empty_sequences_testcase = {
+            "requirement": "REQ002",
+            "item": 2,
+            "tc": 2,
+            "id": "2.2.2",
+            "description": "Test case with empty sequences",
+            "test_sequences": [],
+        }
+        testcase_file = self._create_test_case_data("empty_sequences_tc.yml", empty_sequences_testcase)
+
+        self._setup_test_plan_md_placeholder(self.temp_dir)
+        output_file = os.path.join(self.temp_dir, "output.md")
+
+        result = self._run_cli_result(
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
 
         with open(output_file) as f:
-            content = f.read()
-        verify(content, namer=NamerFactory.with_parameters("output").namer)
+            output_content = f.read()
 
-    def test_render_large_test_runs_list(self):
-        """Test rendering with many test runs."""
-        test_runs = [{"id": 12000 + i, "summary": f"Test Run {i+1}"} for i in range(50)]
+        verify(
+            f"Return Code: {result.returncode}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("empty_sequences").namer,
+        )
 
-        test_data = {
-            "id": 12001,
-            "name": "Large Test Plan",
-            "product": "LargeApp",
-            "version": "1.0",
-            "test_runs": test_runs,
+    def test_render_with_missing_optional_fields(self):
+        """Test rendering with missing optional fields."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data()
+        container_template = self._create_container_template()
+
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
+
+        missing_fields_testcase = {
+            "requirement": "REQ003",
+            "item": 3,
+            "tc": 3,
+            "id": "3.3.3",
+            "description": "Test case with missing optional fields",
         }
+        testcase_file = self._create_test_case_data("missing_fields_tc.yml", missing_fields_testcase)
 
-        input_file = self._create_test_plan_json("large.json", test_data)
+        self._setup_test_plan_md_placeholder(self.temp_dir)
+        output_file = os.path.join(self.temp_dir, "output.md")
 
-        verify(self._run_cli(input_file))
+        result = self._run_cli_result(
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
 
-    def test_error_nonexistent_input_file(self):
-        """Test error handling for nonexistent input file."""
-        result = self._run_cli_result("/nonexistent/file.json")
+        with open(output_file) as f:
+            output_content = f.read()
 
-        self.assertNotEqual(0, result.returncode)
+        verify(
+            f"Return Code: {result.returncode}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("missing_fields").namer,
+        )
 
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+    def test_render_complex_nested_structure(self):
+        """Test rendering with complex nested data structures."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data(product="Complex Product", description="Complex test")
+        container_template = self._create_container_template()
 
-    def test_error_invalid_json_format(self):
-        """Test error handling for malformed JSON."""
-        malformed_file = os.path.join(self.temp_dir, "malformed.json")
-        with open(malformed_file, "w") as f:
-            f.write("{invalid json content")
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
 
-        result = self._run_cli_result(malformed_file)
+        complex_testcase = {
+            "requirement": "REQ_COMPLEX",
+            "item": 10,
+            "tc": 10,
+            "id": "10.10.10",
+            "description": "Complex nested test case with multiple levels",
+            "initial_conditions": {
+                "eUICC": ["Condition A", "Condition B", "Condition C"],
+                "SM-DP+": ["Server ready", "Auth configured"],
+                "Device": ["Registered", "Active"],
+            },
+            "test_sequences": [
+                {
+                    "id": 1,
+                    "name": "First Sequence",
+                    "description": "Multi-step sequence with various conditions",
+                    "steps": [
+                        {
+                            "step": 1,
+                            "description": "Initialize connection",
+                            "command": "init_connection",
+                            "expected": {"result": "CONNECTED", "output": "Connection established"},
+                        },
+                        {
+                            "step": 2,
+                            "description": "Authenticate device",
+                            "command": "authenticate",
+                            "expected": {"result": "AUTH_SUCCESS", "output": "Device authenticated"},
+                        },
+                        {
+                            "step": 3,
+                            "description": "Download profile",
+                            "command": "download_profile",
+                            "expected": {"result": "DOWNLOAD_OK", "output": "Profile downloaded"},
+                        },
+                    ],
+                },
+                {
+                    "id": 2,
+                    "name": "Second Sequence",
+                    "description": "Verification sequence",
+                    "steps": [
+                        {
+                            "step": 1,
+                            "description": "Verify profile installation",
+                            "command": "verify_install",
+                            "expected": {"result": "VERIFIED", "output": "Profile installed correctly"},
+                        }
+                    ],
+                },
+            ],
+        }
+        testcase_file = self._create_test_case_data("complex_tc.yml", complex_testcase)
 
-        self.assertNotEqual(0, result.returncode)
+        self._setup_test_plan_md_placeholder(self.temp_dir)
+        output_file = os.path.join(self.temp_dir, "output.md")
 
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+        result = self._run_cli_result(
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
 
-    def test_error_invalid_yaml_format(self):
-        """Test error handling for malformed YAML."""
-        malformed_file = os.path.join(self.temp_dir, "malformed.yaml")
-        with open(malformed_file, "w") as f:
+        print(result.stdout)
+
+        with open(output_file) as f:
+            output_content = f.read()
+
+        verify(
+            f"Return Code: {result.returncode}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("complex").namer,
+        )
+
+    def test_error_missing_container_argument(self):
+        """Test error handling when --container argument is missing."""
+        result = self._run_cli_result(
+            "--test-case",
+            "data/test_case/schema.json",
+            "data/test_case/template.j2",
+            "data/test_case/gsma_4.4.2.2_TC.yml",
+        )
+
+        verify(result.stderr, namer=NamerFactory.with_parameters("missing_container").namer)
+
+    def test_error_missing_test_case_argument(self):
+        """Test error handling when --test-case argument is missing."""
+        result = self._run_cli_result(
+            "--container",
+            "data/container/schema.json",
+            "data/container/template.j2",
+            "data/container/data.yml",
+        )
+
+        verify(result.stderr, namer=NamerFactory.with_parameters("missing_testcase").namer)
+
+    def test_error_invalid_test_case_yaml(self):
+        """Test error handling with invalid YAML in test case file."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data()
+        container_template = self._create_container_template()
+
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
+
+        invalid_yaml = os.path.join(self.temp_dir, "invalid.yml")
+        with open(invalid_yaml, "w") as f:
             f.write("invalid: yaml: [unclosed")
 
-        result = self._run_cli_result(malformed_file)
+        self._setup_test_plan_md_placeholder(self.temp_dir)
 
-        self.assertNotEqual(0, result.returncode)
+        result = self._run_cli_result(
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            invalid_yaml,
+        )
 
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+        verify(
+            f"Return Code: {result.returncode}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("invalid_yaml").namer,
+        )
 
-    def test_error_unsupported_file_format(self):
-        """Test error handling for unsupported file format."""
-        txt_file = os.path.join(self.temp_dir, "test.txt")
-        with open(txt_file, "w") as f:
-            f.write("plain text content")
+    def test_error_schema_validation_failure(self):
+        """Test error handling when data doesn't match schema."""
+        container_schema = self._create_container_schema()
+        # Create data missing required fields
+        invalid_container_data = os.path.join(self.temp_dir, "invalid_data.yml")
+        with open(invalid_container_data, "w") as f:
+            yaml.dump({"date": "2024-01-01"}, f)  # Missing required 'product' and 'description'
 
-        result = self._run_cli_result(txt_file)
+        container_template = self._create_container_template()
 
-        self.assertNotEqual(0, result.returncode)
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
+        testcase_file = self._create_test_case_data(
+            "tc.yml",
+            {"requirement": "REQ001", "item": 1, "tc": 1, "id": "1.1.1", "description": "Test"},
+        )
 
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+        self._setup_test_plan_md_placeholder(self.temp_dir)
 
-    def test_error_nonexistent_template_file(self):
-        """Test error handling for nonexistent template file."""
-        test_data = {"id": 1, "name": "Test Plan"}
-        input_file = self._create_test_plan_json("test.json", test_data)
+        result = self._run_cli_result(
+            "--container",
+            container_schema,
+            container_template,
+            invalid_container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
 
-        result = self._run_cli_result(input_file, "--template", "/nonexistent/template.j2")
+        verify(
+            f"Return Code: {result.returncode}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("schema_validation").namer,
+        )
 
-        self.assertNotEqual(0, result.returncode)
+    def test_error_insufficient_test_case_arguments(self):
+        """Test error handling when insufficient test-case arguments provided."""
+        result = self._run_cli_result(
+            "--container",
+            "data/container/schema.json",
+            "data/container/template.j2",
+            "data/container/data.yml",
+            "--test-case",
+            "data/test_case/schema.json",
+            "data/test_case/template.j2",
+        )
 
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+        verify(result.stderr, namer=NamerFactory.with_parameters("insufficient_args").namer)
 
-    def test_error_no_arguments(self):
-        """Test error handling when no arguments provided."""
-        result = self._run_cli_result()
+    def test_render_to_output_file(self):
+        """Test rendering output to a specified file."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data()
+        container_template = self._create_container_template()
 
-        self.assertNotEqual(0, result.returncode)
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
 
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
-        verify(result.stderr, namer=NamerFactory.with_parameters("stderr").namer)
+        testcase = {
+            "requirement": "REQ_OUTPUT",
+            "item": 5,
+            "tc": 5,
+            "id": "5.5.5",
+            "description": "Test output to file",
+            "test_sequences": [
+                {
+                    "id": 1,
+                    "name": "Sequence One",
+                    "description": "Test sequence",
+                    "steps": [
+                        {
+                            "step": 1,
+                            "description": "Step one",
+                            "command": "cmd",
+                            "expected": {"result": "OK", "output": "Success"},
+                        }
+                    ],
+                }
+            ],
+        }
+        testcase_file = self._create_test_case_data("output_tc.yml", testcase)
 
-    def test_render_with_multi_line_text_field(self):
-        """Test rendering with multi-line text descriptions."""
-        test_data = {
-            "id": 13001,
-            "name": "Multi-line Description Plan",
-            "product": "MultiLineApp",
-            "text": """This is a multi-line description.
+        self._setup_test_plan_md_placeholder(self.temp_dir)
+        output_file = os.path.join(self.temp_dir, "custom_output.md")
+
+        result = self._run_cli_result(
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
+
+        print(result.stdout)
+
+        self.assertTrue(os.path.exists(output_file))
+
+        with open(output_file) as f:
+            output_content = f.read()
+
+        verify(
+            f"Return Code: {result.returncode}\n\nFile exists: {os.path.exists(output_file)}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("output_file").namer,
+        )
+
+    def test_render_with_special_characters_in_descriptions(self):
+        """Test rendering with special characters like <, >, &, quotes in descriptions."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data(
+            product='Product with <tags> & "quotes"',
+            description="Description with 'apostrophes' and <html> tags",
+        )
+        container_template = self._create_container_template()
+
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
+
+        special_chars_testcase = {
+            "requirement": "REQ<001>",
+            "item": 6,
+            "tc": 6,
+            "id": "6.6.6 <Test>",
+            "description": "Test with special chars: < > & \" ' and @#$%",
+            "test_sequences": [
+                {
+                    "id": 1,
+                    "name": "Sequence with <brackets>",
+                    "description": 'Description with & ampersands and "quotes"',
+                    "steps": [
+                        {
+                            "step": 1,
+                            "description": "Step with <html> tags & symbols",
+                            "command": "cmd --param='value'",
+                            "expected": {
+                                "result": "Result with <> and &",
+                                "output": "Output with \"double\" and 'single' quotes",
+                            },
+                        }
+                    ],
+                }
+            ],
+        }
+        testcase_file = self._create_test_case_data("special_chars_tc.yml", special_chars_testcase)
+
+        self._setup_test_plan_md_placeholder(self.temp_dir)
+        output_file = os.path.join(self.temp_dir, "output.md")
+
+        result = self._run_cli_result(
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
+
+        with open(output_file) as f:
+            output_content = f.read()
+
+        verify(
+            f"Return Code: {result.returncode}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("special_chars").namer,
+        )
+
+    def test_render_with_multiline_descriptions(self):
+        """Test rendering with multi-line descriptions."""
+        container_schema = self._create_container_schema()
+        container_data = self._create_container_data(
+            description="""This is a multi-line description.
 
 It contains multiple paragraphs.
 
@@ -446,142 +723,72 @@ It contains multiple paragraphs.
 - Bullet point 2
 - Bullet point 3
 
-And some final text.""",
-            "test_runs": [
-                {
-                    "id": 1301,
-                    "summary": "Run with notes",
-                    "notes": """These are multi-line notes.
+And some final text."""
+        )
+        container_template = self._create_container_template()
 
-Step 1: Do something
-Step 2: Do something else
-Step 3: Verify results""",
+        testcase_schema = self._create_test_case_schema()
+        testcase_template = self._create_test_case_template()
+
+        multiline_testcase = {
+            "requirement": "REQ_MULTILINE",
+            "item": 7,
+            "tc": 7,
+            "id": "7.7.7",
+            "description": """This test case has a multi-line description.
+
+It spans multiple lines and includes:
+- Important point 1
+- Important point 2
+
+And additional details.""",
+            "test_sequences": [
+                {
+                    "id": 1,
+                    "name": "Multiline Sequence",
+                    "description": """Step-by-step sequence:
+
+1. First step
+2. Second step
+3. Third step
+
+Each step is important.""",
+                    "steps": [
+                        {
+                            "step": 1,
+                            "description": "Single line step",
+                            "command": "cmd",
+                            "expected": {"result": "OK", "output": "Success\nWith newline"},
+                        }
+                    ],
                 }
             ],
         }
+        testcase_file = self._create_test_case_data("multiline_tc.yml", multiline_testcase)
 
-        input_file = self._create_test_plan_json("multiline.json", test_data)
-
-        verify(self._run_cli(input_file))
-
-    def test_render_real_exported_testplans_with_detailed_template(self):
-        """Test rendering real exported_testplans.json with detailed template."""
-        output_file = os.path.join(self.temp_dir, "real_detailed.md")
-
-        result = self._run_cli_result(
-            "tests/approval/exported_testplans.json", output_file, "--template", "tests/approval/testplan_detailed.j2"
-        )
-
-        self.assertEqual(result.returncode, 0)
-
-        with open(output_file) as f:
-            content = f.read()
-        verify(content)
-
-    def test_render_with_custom_markdown_format(self):
-        """Test rendering with custom markdown formatting template."""
-        test_data = {
-            "id": 14001,
-            "name": "Custom Markdown Plan",
-            "type": "System Test",
-            "product": "MarkdownApp",
-            "version": "2.0",
-            "author": "Markdown Author",
-            "test_runs": [
-                {"id": 1401, "summary": "First Run", "build": "2.0.1"},
-                {"id": 1402, "summary": "Second Run", "build": "2.0.2"},
-                {"id": 1403, "summary": "Third Run", "build": "2.0.3"},
-            ],
-        }
-
-        custom_template = """---
-title: {{ plan.name }}
-id: {{ plan.id }}
----
-
-# {{ plan.name }}
-
-> **Type:** {{ plan.type|default('N/A') }}
-> **Product:** {{ plan.product|default('N/A') }} ({{ plan.version|default('N/A') }})
-> **Author:** {{ plan.author|default('Unknown') }}
-
-## Test Runs
-
-| # | Run ID | Summary | Build |
-|---|--------|---------|-------|
-{% for run in plan.test_runs -%}
-| {{ loop.index }} | {{ run.id }} | {{ run.summary|default('N/A') }} | {{ run.build|default('N/A') }} |
-{% endfor -%}
-
-Total: **{{ plan.test_runs|length if plan.test_runs else 0 }}** test runs
-"""
-
-        input_file = self._create_test_plan_json("markdown.json", test_data)
-        template_file = self._create_custom_template("markdown.j2", custom_template)
+        self._setup_test_plan_md_placeholder(self.temp_dir)
         output_file = os.path.join(self.temp_dir, "output.md")
 
-        result = self._run_cli_result(input_file, output_file, "--template", template_file)
-
-        self.assertEqual(result.returncode, 0)
+        result = self._run_cli_result(
+            "-o",
+            output_file,
+            "--container",
+            container_schema,
+            container_template,
+            container_data,
+            "--test-case",
+            testcase_schema,
+            testcase_template,
+            testcase_file,
+        )
 
         with open(output_file) as f:
-            content = f.read()
-        verify(content)
+            output_content = f.read()
 
-    def test_render_with_json_list_input(self):
-        """Test rendering when input is a JSON list (array of test plans)."""
-        json_path = Path(".") / "tests" / "approval" / "exported_testplans.json"
-        assert json_path.exists(), f"Test data file not found: {json_path!s}"
-        with json_path.open() as f:
-            content = f.read()
-            if content.strip().startswith("["):
-                custom_template = """{% if plan is iterable and plan is not mapping %}
-{% for p in plan %}
-# Test Plan: {{ p.name|default('Untitled') }}
-- ID: {{ p.id|default('N/A') }}
-- Product: {{ p.product__name|default(p.product)|default('N/A') }}
-- Type: {{ p.type__name|default(p.type)|default('N/A') }}
-- Author: {{ p.author__username|default(p.author)|default('N/A') }}
-
-{% endfor %}
-{% else %}
-# Test Plan: {{ plan.name|default('Untitled') }}
-- ID: {{ plan.id|default('N/A') }}
-{% endif %}
-"""
-                template_file = self._create_custom_template("list.j2", custom_template)
-                output_file = os.path.join(self.temp_dir, "list_output.md")
-
-                result = self._run_cli_result(json_path, output_file, "--template", template_file)
-
-                assert result.returncode == 0
-
-                with open(output_file) as f:
-                    file_content = f.read()
-                verify(file_content, namer=NamerFactory.with_parameters("list_output").namer)
-
-        test_data = [
-            {"id": 15001, "name": "First Plan", "product": "Product1"},
-            {"id": 15002, "name": "Second Plan", "product": "Product2"},
-        ]
-
-        input_file = self._create_test_plan_json("list.json", test_data)
-
-        custom_template = """{% if plan is iterable and plan is not mapping %}
-{% for p in plan %}
-Plan {{ loop.index }}: {{ p.name }} (ID: {{ p.id }})
-{% endfor %}
-{% else %}
-Single Plan: {{ plan.name }}
-{% endif %}
-"""
-        template_file = self._create_custom_template("list.j2", custom_template)
-
-        result = self._run_cli_result(input_file, "--template", template_file)
-
-        self.assertEqual(result.returncode, 0)
-
-        verify(result.stdout, namer=NamerFactory.with_parameters("stdout").namer)
+        verify(
+            f"Return Code: {result.returncode}\n\nOutput File:\n{output_content}\n\nStderr:\n{result.stderr}",
+            namer=NamerFactory.with_parameters("multiline").namer,
+        )
 
 
 if __name__ == "__main__":

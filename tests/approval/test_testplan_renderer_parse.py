@@ -9,7 +9,7 @@ from io import StringIO
 from pathlib import Path
 
 sys.path.append(os.path.join(os.path.dirname(__file__), Path("..") / ".."))
-from testplan_renderer_gsma import RendererArgs, TestPlanRendererArgsOutput, parse_and_validate_args  # noqa: E402
+from testplan_renderer import RendererArgs, TestPlanRendererArgsOutput, parse_and_validate_args  # noqa: E402
 
 
 class TestParseAndValidateArgsSuccess(unittest.TestCase):
