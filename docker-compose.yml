@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: testcase-tool:dev
+    volumes:
+      - ${PWD}/data:/app/data:cached
+      - ${PWD}/tests:/app/tests:cached
+    environment:
+      - PYTHONUNBUFFERED=1
+    # default command keeps container running; override when running (e.g., `docker compose run --service-ports app python -m yourapp`)
+    command: ["bash", "-c", "tail -f /dev/null"]
+    tty: true

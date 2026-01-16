@@ -28,3 +28,8 @@ lint: verify-virtualenv
 pytest-junit: verify-virtualenv
 	@uv run pytest --junitxml=data_working/results.xml > /dev/null
 .PHONY: pytest-junit
+
+docker-build:
+	docker build -t testplan-renderer .
+	docker run testplan-renderer:latest --version
+.PHONY: docker-build
